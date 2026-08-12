@@ -32,3 +32,21 @@ Use Conventional Commits, matching the current history: `feat: ...`, `fix: ...`,
 ## Security & Configuration Tips
 
 Do not commit secrets, tokens, or service keys in config files. Keep deployment-specific settings in the target platform environment, and review generated files such as `dist`, `src/constants/lqips.json`, and `src/constants/icons.ts` before committing them.
+
+## 图床操作指南（Image Hosting）
+
+站点图片统一存放在独立的图床仓库 **`ChamiTea1/img-bed`**（GPL-3.0 无关的个人图床），通过 jsDelivr CDN 引用，避免图片进入博客仓库、拖慢克隆和构建。
+
+### 引用格式
+
+- jsDelivr URL 模板：`https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/<路径>/<文件名>`
+- 头像已配置为：`https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/avatar/shaoye.jpg`（见 `src/config/profileConfig.ts`）
+- 文章插图示例：上传到图床 `posts/2026/xxx.jpg` 后，在 Markdown 中写 `![alt](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/posts/2026/xxx.jpg)`
+
+
+
+
+### 注意事项
+
+- 上传后验证：`curl -sL -o /dev/null -w "%{http_code}" "https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/<路径>/<文件名>"` 应为 `200`
+- jsDelivr 缓存约 24 小时；更新同名图片后建议改文件名或加 `?v=2` 查询参数
