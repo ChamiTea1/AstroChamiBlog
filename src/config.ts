@@ -28,7 +28,7 @@ export const themeConfig = {
 	defaults: {
 		favicon: '/images/redefine-favicon.svg',
 		logo: '',
-		avatar: '/images/redefine-avatar.svg',
+		avatar: 'https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/avatar/shaoye.jpg',
 	},
 
 	colors: {
@@ -101,10 +101,11 @@ export const themeConfig = {
 			light: '/images/wallhaven-wqery6-light.webp',
 			dark: '/images/wallhaven-wqery6-dark.webp',
 		},
-		title: "云销雨霁，彩彻区明",
+		title: "当灵魂坠入无边黑暗，总有人携光而来拯救之",
 		subtitle: {
-			text: ['若灵魂深陷罪孽泥沼，唯以自渡与微光拯救之', 
-					'学习笔记与踩坑记录', '生活随笔与碎碎念'],
+			text: ['云销雨霁，彩彻区明', 
+				   '萍水相逢，尽是他乡之客', 
+				   '生活随笔与碎碎念'],
 			hitokoto: {
 				enable: false,
 				show_author: false,

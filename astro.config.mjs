@@ -8,6 +8,7 @@ import { defineConfig } from 'astro/config';
 import { siteConfig, markdownConfig } from './src/config';
 import { rehypeCodeContainers } from './src/plugins/rehype-code-containers';
 import { rehypeExternalLinks, rehypeDeleteMask, rehypeTableScroll, rehypeLazyload, rehypeImageCaption } from './src/plugins/rehype-filters';
+import { rehypeImageSize } from './src/plugins/rehype-image-size';
 import { remarkRedefineTags } from './src/plugins/remark-tags';
 import { remarkMermaid } from './src/plugins/remark-mermaid';
 
@@ -21,7 +22,7 @@ export default defineConfig({
 	markdown: {
 		processor: unified({
 			remarkPlugins: [remarkRedefineTags, remarkMermaid],
-			rehypePlugins: [rehypeCodeContainers, rehypeExternalLinks, rehypeDeleteMask, rehypeTableScroll, rehypeLazyload, rehypeImageCaption],
+			rehypePlugins: [rehypeCodeContainers, rehypeExternalLinks, rehypeDeleteMask, rehypeTableScroll, rehypeLazyload, rehypeImageCaption, rehypeImageSize],
 		}),
 		shikiConfig: {
 			themes: {
