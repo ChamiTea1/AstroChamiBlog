@@ -471,11 +471,38 @@ function renderBilibili(args: string[]): string {
 /* ---------------------------------------------------------- */
 
 function renderAudio(args: string[]): string {
-	const parsed = parseTagArgs(args);
-	const name = (parsed.named.name || parsed.positional[0] || '').trim();
-	const artist = (parsed.named.artist || parsed.positional[1] || '').trim();
-	const url = (parsed.named.url || parsed.positional[2] || '').trim();
-	const cover = (parsed.named.cover || parsed.positional[3] || '').trim();
+	const raw = args
+		.join(' ')
+		.replace(/[“”]/g, '"')
+		.replace(/[‘’]/g, "'")
+		.trim();
+	if (!raw) return '';
+
+	let name = '';
+	let artist = '';
+	let url = '';
+	let cover = '';
+
+	const named: Record<string, string> = {};
+	const namedRegex = /(name|artist|url|cover)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s,]+))/g;
+	let match: RegExpExecArray | null;
+	while ((match = namedRegex.exec(raw)) !== null) {
+		named[match[1]] = match[2] ?? match[3] ?? match[4] ?? '';
+	}
+
+	if (Object.keys(named).length > 0) {
+		name = named.name || '';
+		artist = named.artist || '';
+		url = named.url || '';
+		cover = named.cover || '';
+	} else {
+		const parts = raw.split(',').map((part) => part.trim()).filter(Boolean);
+		name = parts[0] || '';
+		artist = parts[1] || '';
+		url = parts[2] || '';
+		cover = parts[3] || '';
+	}
+
 	if (!url) return '';
 	const data = JSON.stringify({ name: name || 'Audio', artist, url, cover });
 	return `<div class="aplayer-inline my-4" data-audio="${escapeHtml(data)}"></div>`;

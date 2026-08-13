@@ -8,6 +8,7 @@ tags:
   - 米哈游
 categories:
   - 游戏
+cover: '/images/zenless/come-alive.jpg'
 ---
 
 如果把《原神》比作一场跨越山海的旅途，那《绝区零》（Zenless Zone Zero）就是一座永远在霓虹里醒着的城市——复古的街道、张扬的涂鸦、以及那些穿梭在空洞里讨生活的代理人。
@@ -46,12 +47,26 @@ categories:
 
 绝区零最出圈的首先是它的视觉风格：复古未来主义的美术基底，配上街头涂鸦、漫画分镜式的过场演出，UI 里处处是唱片、录像带和霓虹灯牌的年代感元素。
 
-音乐同样值得单独一夸。HOYO-MiX 为它创作了大量电子、爵士、嘻哈风格的曲目，战斗曲的鼓点和城市的霓虹简直天生一对。下面这首是游戏 OST 中我个人很推荐的一首，戴上耳机感受一下：
+音乐同样值得单独一夸。HOYO-MiX 为它创作了大量电子、爵士、嘻哈风格的曲目，战斗曲的鼓点和城市的霓虹简直天生一对。下面这首《覆灭重生 Come Alive》是公测前的主题曲，戴上耳机感受一下：
 
-{% audio ZENLESS 主题曲占位, HOYO-MiX, https://example.com/zzz-music.mp3, /images/redefine-og.webp %}
+{% audio 覆灭重生 Come Alive, 三Z-STUDIO/HOYO-MiX, https://music.163.com/song/media/outer/url?id=2604937294.mp3, /images/zenless/come-alive.jpg %}
 
-{% note warning %}
-上面的音频链接目前是占位符，请替换为实际的 mp3 直链（写法：`{% audio 歌名, 歌手, mp3链接, 封面链接 %}`）。
+除了主题曲，游戏还发布了大量高质量单曲，每一张封面都是独立的视觉设计：
+
+{% grid 2 %}
+
+![绝区零《预言 Prophecy》单曲封面](/images/zenless/prophecy.jpg)
+
+![绝区零《DAMIDAMI》单曲封面](/images/zenless/damidami.jpg)
+
+![绝区零《Tiny Giant 小巨星》单曲封面](/images/zenless/tiny-giant.jpg)
+
+![绝区零《BITE! 咬合力》单曲封面](/images/zenless/bite.png)
+
+{% endgrid %}
+
+{% note info %}
+如果你喜欢游戏音乐，强烈建议把 HOYO-MiX 的绝区零 OST 完整听一遍——从爵士到摇滚再到电子，风格跨度大得惊人。
 {% endnote %}
 
 ## 战斗系统：三分钟上手
