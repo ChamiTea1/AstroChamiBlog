@@ -322,7 +322,7 @@ export const themeConfig = {
 	footer: {
 		runtime: true,
 		icon: '<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>',
-		start: '2022/8/17 11:45:14',
+		start: '2026/8/10 00:00:00',
 		statistics: true,
 		customize: '',
 		icp: {

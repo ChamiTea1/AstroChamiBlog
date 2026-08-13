@@ -8,6 +8,8 @@ const posts = await getCollection('blog');
 const sitePostsCount = posts.length;
 const siteWordCount = posts.reduce((sum, post) => sum + getWordCount(post.body ?? '').words, 0);
 const startYear = themeConfig.footer.start ? new Date(themeConfig.footer.start).getFullYear() : null;
+const currentYear = new Date().getFullYear();
+const showYearRange = startYear !== null && startYear !== currentYear;
 ---
 
 <footer id="site-footer" class="footer relative mt-5 h-auto w-full py-5">
@@ -25,9 +27,9 @@ const startYear = themeConfig.footer.start ? new Date(themeConfig.footer.start).
 			{themeConfig.footer.customize && <div class="my-1" set:html={themeConfig.footer.customize} />}
 			<div>
 				&copy;
-				{startYear && <span>{startYear}</span>}
-				{startYear && <> - </>}
-				{new Date().getFullYear()}&nbsp;&nbsp;
+				{showYearRange && <span>{startYear}</span>}
+				{showYearRange && <> - </>}
+				{currentYear}&nbsp;&nbsp;
 				<span set:html={themeConfig.footer.icon || '<i class="fa-regular fa-computer-classic"></i>'} />&nbsp;&nbsp;
 				<a href="/">{siteConfig.author}</a>
 				{themeConfig.footer.statistics && (
