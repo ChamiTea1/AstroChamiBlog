@@ -12,11 +12,11 @@ const { data } = post;
 
 const licenses: Record<string, string> = {
 	all_rights_reserved: __('copyright.all_rights_reserved', siteConfig.author),
-	cc_by: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>'),
-	cc_by_sa: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>'),
-	cc_by_nc: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>'),
-	cc_by_nd: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by-nd/4.0">CC BY-ND 4.0</a>'),
-	cc_by_nc_sa: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a>'),
+	cc_by: __('copyright.license_content', '<a class="font-semibold hover:!text-primary" href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>'),
+	cc_by_sa: __('copyright.license_content', '<a class="font-semibold hover:!text-primary" href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>'),
+	cc_by_nc: __('copyright.license_content', '<a class="font-semibold hover:!text-primary" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>'),
+	cc_by_nd: __('copyright.license_content', '<a class="font-semibold hover:!text-primary" href="https://creativecommons.org/licenses/by-nd/4.0">CC BY-ND 4.0</a>'),
+	cc_by_nc_sa: __('copyright.license_content', '<a class="font-semibold hover:!text-primary" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a>'),
 	public_domain: __('copyright.public_domain'),
 };
 
@@ -31,26 +31,73 @@ if (data.copyright && data.copyright !== '') {
 
 const licenseHtml = licenseType === 'custom' ? (data.copyright as string) : licenseType ? licenses[licenseType] : '';
 
-const postUrl = `${siteConfig.url.replace(/\/$/, '')}/blog/${post.id}/`;
 const author = data.author || siteConfig.author;
+const isOriginal = !data.author || data.author === siteConfig.author;
 const dateTimeFormat = 'YYYY-MM-DD HH:mm:ss';
+const postUrl = `${siteConfig.url.replace(/\/$/, '')}/blog/${post.id}/`;
+
+const tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
+const tagUrl = (tag: string) => `/tags/${encodeURIComponent(tag.toLowerCase())}/`;
+
+const hasLicenseDetail = Boolean(licenseHtml) || Boolean(data.updatedDate && data.updatedDate.valueOf() !== data.pubDate.valueOf());
 ---
 
-<div class="relative box-border w-full rounded-xl border border-rd-gray-alpha-400 bg-rd-gray-100 px-1.5 py-2.5 font-[family-name:var(--font-article-title)] text-base [&_ul]:ml-2.5 [&_li]:mb-1 [&_li]:overflow-hidden [&_li]:text-ellipsis [&_li]:whitespace-nowrap [&_li]:text-rd-gray-1000 [&_li:last-child]:mb-0">
-	<ul>
-		<li><strong>{__('copyright.title')}:</strong> {data.title}</li>
-		<li><strong>{__('copyright.author')}:</strong> {author}</li>
-		<li><strong>{__('copyright.create_time')}:</strong> {formatDate(data.pubDate, dateTimeFormat)}</li>
-		{data.updatedDate && data.updatedDate.valueOf() !== data.pubDate.valueOf() && (
-			<li><strong>{__('copyright.update_time')}:</strong> {formatDate(data.updatedDate, dateTimeFormat)}</li>
-		)}
-		<li><strong>{__('copyright.link')}:</strong> {postUrl}</li>
-		{
-			licenseHtml && (
-				<li>
-					<strong>{__('copyright.license_title')}:</strong> <span set:html={licenseHtml} />
-				</li>
-			)
-		}
-	</ul>
+<div class="post-copyright relative mt-14 box-border w-full rounded-2xl border border-rd-gray-alpha-400 bg-rd-gray-100 px-5 pt-11 pb-5 text-center transition-colors duration-300 hover:border-rd-gray-800/30">
+	<a
+		href="/"
+		title={siteConfig.author}
+		class="absolute -top-8 left-1/2 size-16 -translate-x-1/2 overflow-hidden rounded-full border-2 border-rd-gray-alpha-400 bg-rd-background-100 shadow-rd"
+	>
+		<img src={themeConfig.defaults.avatar} alt={siteConfig.author} class="h-full w-full object-cover" />
+	</a>
+
+	<div class="text-xl font-bold text-rd-gray-1000">{author}</div>
+	<div class="mt-1 text-sm text-rd-gray-900">{siteConfig.subtitle}</div>
+
+	<div class="mt-3 flex items-center justify-center gap-2">
+		<span class="select-none rounded-lg bg-primary px-3 py-0.5 text-sm font-semibold text-rd-primary-text">
+			{isOriginal ? __('original') : __('reprint')}
+		</span>
+		<a
+			href={postUrl}
+			title={__('copyright.link')}
+			class="line-clamp-1 text-base font-medium text-rd-gray-1000 transition-colors hover:!text-primary"
+		>
+			{data.title}
+		</a>
+	</div>
+
+	{
+		hasLicenseDetail && (
+			<div class="mx-auto mt-3 flex max-w-fit flex-col items-start gap-1 rounded-xl border border-rd-gray-alpha-400 bg-rd-background-100 px-4 py-2 text-left text-xs text-rd-gray-900">
+				{data.updatedDate && data.updatedDate.valueOf() !== data.pubDate.valueOf() && (
+					<span class="flex items-center gap-1.5">
+						<span class="shrink-0">{__('copyright.update_time')}</span>
+						<time datetime={data.updatedDate.toISOString()}>{formatDate(data.updatedDate, dateTimeFormat)}</time>
+					</span>
+				)}
+				{
+					licenseHtml && (
+						<span class="flex items-center gap-1.5">
+							<span class="shrink-0">{__('copyright.license_title')}</span>
+							<span set:html={licenseHtml} />
+						</span>
+					)
+				}
+			</div>
+		)
+	}
+
+	{
+		tags.length > 0 && (
+			<div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+				{tags.map((tag) => (
+					<a href={tagUrl(tag)} class="flex items-center gap-1 rounded-lg border border-rd-gray-alpha-400 bg-rd-background-100 px-2.5 py-1 text-xs text-rd-gray-900 transition-colors hover:!border-primary hover:!text-primary">
+						<i class="fa-regular fa-tag" aria-hidden="true"></i>
+						{tag}
+					</a>
+				))}
+			</div>
+		)
+	}
 </div>
