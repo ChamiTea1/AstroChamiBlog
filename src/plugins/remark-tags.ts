@@ -286,9 +286,15 @@ function renderFolding(args: string[], body: Node[]): string {
 		open = ['1', 'true', 'yes', 'on'].includes((parsed.named.open || '').toLowerCase());
 	} else {
 		const delimiter = rawArgs.includes('::') ? '::' : ',';
-		const [style = '', titleArg = ''] = rawArgs.split(delimiter).map((p) => p.trim());
-		title = titleArg;
-		classNames = style.split(/\s+/).filter(Boolean);
+		const parts = rawArgs.split(delimiter).map((p) => p.trim()).filter(Boolean);
+		if (parts.length === 1) {
+			// 单参数即标题：{% folding 标题 %}
+			title = parts[0];
+			classNames = [];
+		} else {
+			classNames = (parts[0] || '').split(/\s+/).filter(Boolean);
+			title = parts[1] || '';
+		}
 	}
 
 	const variant = classNames.find((cls) => FOLDING_VARIANTS.has(cls)) || 'default';

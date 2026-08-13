@@ -15,7 +15,7 @@ cover: '/images/zenless/come-alive.jpg'
 
 这是米哈游继《崩坏：星穹铁道》之后交出的又一份答卷，2024 年 7 月 4 日全球公测。话不多说，先看一段火出圈的千夏跳舞，感受一下这游戏的魅力：
 
-{% bilibili BV1z7FPz4EvM %}
+{% bilibili BV1ebg16jEhp %}
 
 ## 游戏概览
 
