@@ -2,34 +2,33 @@
 
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import { defineConfig, fontProviders } from 'astro/config';
+import tailwindcss from '@tailwindcss/vite';
+import { unified } from '@astrojs/markdown-remark';
+import { defineConfig } from 'astro/config';
+import { siteConfig, markdownConfig } from './src/config';
+import { rehypeCodeContainers } from './src/plugins/rehype-code-containers';
+import { rehypeExternalLinks, rehypeDeleteMask, rehypeTableScroll, rehypeLazyload, rehypeImageCaption } from './src/plugins/rehype-filters';
+import { remarkRedefineTags } from './src/plugins/remark-tags';
+import { remarkMermaid } from './src/plugins/remark-mermaid';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://example.com',
+	site: siteConfig.url,
 	integrations: [mdx(), sitemap()],
-	fonts: [
-		{
-			provider: fontProviders.local(),
-			name: 'Atkinson',
-			cssVariable: '--font-atkinson',
-			fallbacks: ['sans-serif'],
-			options: {
-				variants: [
-					{
-						src: ['./src/assets/fonts/atkinson-regular.woff'],
-						weight: 400,
-						style: 'normal',
-						display: 'swap',
-					},
-					{
-						src: ['./src/assets/fonts/atkinson-bold.woff'],
-						weight: 700,
-						style: 'normal',
-						display: 'swap',
-					},
-				],
+	vite: {
+		plugins: [tailwindcss()],
+	},
+	markdown: {
+		processor: unified({
+			remarkPlugins: [remarkRedefineTags, remarkMermaid],
+			rehypePlugins: [rehypeCodeContainers, rehypeExternalLinks, rehypeDeleteMask, rehypeTableScroll, rehypeLazyload, rehypeImageCaption],
+		}),
+		shikiConfig: {
+			themes: {
+				light: markdownConfig.codeThemes.light,
+				dark: markdownConfig.codeThemes.dark,
 			},
+			wrap: true,
 		},
-	],
+	},
 });

@@ -1,0 +1,65 @@
+---
+import { getCollection } from 'astro:content';
+import { siteConfig, themeConfig, getAuthorLabel } from '../config';
+import { __ } from '../i18n';
+import Statistics from './Statistics.astro';
+
+const posts = await getCollection('blog');
+const sidebar = themeConfig.home.sidebar;
+const announcement =
+	typeof sidebar.announcement === 'string' && sidebar.announcement.trim() ? sidebar.announcement : null;
+const hasMenu = sidebar.links.length > 0 || Boolean(announcement);
+const infoFirst = sidebar.first_item === 'info';
+const sidebarPosition = sidebar.position === 'right' ? 'order-last' : 'order-first';
+const authorLabel =
+	themeConfig.articles.author_label.enable === true ? getAuthorLabel(posts.length) : '';
+---
+
+<aside class:list={[sidebarPosition, 'hidden w-60 shrink-0 md:block']}>
+	<div class="sticky top-[calc(var(--current-navbar-height)_+_1rem)] flex flex-col gap-6">
+		<div data-sidebar-panel class:list={[infoFirst ? 'order-first' : 'order-last', 'rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 p-4']}>
+			<div class="flex justify-center">
+				<img src={themeConfig.defaults.avatar} alt={siteConfig.author} class="h-20 w-20 rounded-2xl border border-rd-gray-alpha-400 p-px" />
+			</div>
+			<div class="my-2.5 flex flex-col justify-center">
+				<div class="text-center text-xl font-semibold text-rd-gray-1000">{siteConfig.author}</div>
+				{authorLabel && <div class="text-center text-xs text-rd-gray-900">{authorLabel}</div>}
+			</div>
+			<Statistics />
+		</div>
+
+		{
+			hasMenu && (
+				<nav
+					data-sidebar-panel
+					aria-label={siteConfig.title}
+					class:list={[infoFirst ? 'order-last' : 'order-first', 'overflow-hidden rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100']}
+				>
+					<div data-sidebar-header class="border-b border-rd-gray-alpha-400 bg-rd-gray-100 px-6 py-4 flex flex-col">
+						<div class="text-left font-title text-xl font-medium text-rd-gray-1000">{siteConfig.title}</div>
+						{announcement && <div class="text-left text-sm text-rd-gray-900">{announcement}</div>}
+					</div>
+
+					{
+						sidebar.links.length > 0 && (
+							<ul class="flex flex-col p-2">
+								{sidebar.links.map((link) => (
+									<li>
+										<a
+											data-sidebar-link
+											class="flex w-full items-center gap-1.5 rounded-lg px-3 py-1.5 text-rd-gray-1000 hover:bg-rd-gray-200/30 hover:text-primary tracking-tight text-sm font-medium"
+											href={link.path}
+										>
+											{link.icon && <i class={`${link.icon} w-5 text-center text-base`} aria-hidden="true"></i>}
+											<span>{__(link.label.toLowerCase()).toUpperCase()}</span>
+										</a>
+									</li>
+								))}
+							</ul>
+						)
+					}
+				</nav>
+			)
+		}
+	</div>
+</aside>

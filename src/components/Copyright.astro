@@ -1,0 +1,56 @@
+---
+import { siteConfig, themeConfig } from '../config';
+import { __, formatDate } from '../i18n';
+import type { Post } from '../utils/collections';
+
+interface Props {
+	post: Post;
+}
+
+const { post } = Astro.props;
+const { data } = post;
+
+const licenses: Record<string, string> = {
+	all_rights_reserved: __('copyright.all_rights_reserved', siteConfig.author),
+	cc_by: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>'),
+	cc_by_sa: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>'),
+	cc_by_nc: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>'),
+	cc_by_nd: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by-nd/4.0">CC BY-ND 4.0</a>'),
+	cc_by_nc_sa: __('copyright.license_content', '<a class="font-bold" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a>'),
+	public_domain: __('copyright.public_domain'),
+};
+
+let licenseType: string | null = null;
+if (data.copyright && data.copyright !== '') {
+	licenseType = 'custom';
+} else if (data.license && licenses[data.license]) {
+	licenseType = data.license;
+} else if (themeConfig.articles.copyright.default && licenses[themeConfig.articles.copyright.default]) {
+	licenseType = themeConfig.articles.copyright.default;
+}
+
+const licenseHtml = licenseType === 'custom' ? (data.copyright as string) : licenseType ? licenses[licenseType] : '';
+
+const postUrl = `${siteConfig.url.replace(/\/$/, '')}/blog/${post.id}/`;
+const author = data.author || siteConfig.author;
+const dateTimeFormat = 'YYYY-MM-DD HH:mm:ss';
+---
+
+<div class="relative box-border w-full rounded-xl border border-rd-gray-alpha-400 bg-rd-gray-100 px-1.5 py-2.5 font-[family-name:var(--font-article-title)] text-base [&_ul]:ml-2.5 [&_li]:mb-1 [&_li]:overflow-hidden [&_li]:text-ellipsis [&_li]:whitespace-nowrap [&_li]:text-rd-gray-1000 [&_li:last-child]:mb-0">
+	<ul>
+		<li><strong>{__('copyright.title')}:</strong> {data.title}</li>
+		<li><strong>{__('copyright.author')}:</strong> {author}</li>
+		<li><strong>{__('copyright.create_time')}:</strong> {formatDate(data.pubDate, dateTimeFormat)}</li>
+		{data.updatedDate && data.updatedDate.valueOf() !== data.pubDate.valueOf() && (
+			<li><strong>{__('copyright.update_time')}:</strong> {formatDate(data.updatedDate, dateTimeFormat)}</li>
+		)}
+		<li><strong>{__('copyright.link')}:</strong> {postUrl}</li>
+		{
+			licenseHtml && (
+				<li>
+					<strong>{__('copyright.license_title')}:</strong> <span set:html={licenseHtml} />
+				</li>
+			)
+		}
+	</ul>
+</div>

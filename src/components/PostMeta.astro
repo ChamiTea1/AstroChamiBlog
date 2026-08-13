@@ -1,0 +1,98 @@
+---
+import { themeConfig } from '../config';
+import { __, formatDate } from '../i18n';
+import type { Post } from '../utils/collections';
+
+interface Props {
+	post: Post;
+	wordCount?: number;
+	minutes?: number;
+}
+
+const { post, wordCount, minutes } = Astro.props;
+const { data } = post;
+
+const articleDateFormat = 'YYYY-MM-DD HH:mm:ss';
+const formatArticleDate = (value: Date) => formatDate(value, articleDateFormat).replace(' 00:00:00', '').replace(':00', '');
+
+const categories = Array.isArray(data.categories) ? data.categories : data.categories ? [data.categories] : [];
+const tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
+
+const metaItemClass = 'mr-2.5 last:mr-0';
+const categoryUrl = (cat: string) => `/categories/${cat.split('/').map(encodeURIComponent).join('/')}/`;
+const tagUrl = (tag: string) => `/tags/${encodeURIComponent(tag.toLowerCase())}/`;
+---
+
+<div class="text-xs text-rd-gray-900 [&_a]:text-rd-gray-900 [&_a:hover]:text-primary">
+	<span class={`group relative ${metaItemClass}`}>
+		<i class="fa-regular fa-pen-fancy" aria-hidden="true"></i>&nbsp;
+		<time datetime={data.pubDate.toISOString()}>{formatArticleDate(data.pubDate)}</time>
+		<span class="pointer-events-none absolute top-6 left-1/2 z-10 w-max -translate-x-1/2 rounded-sm border border-rd-gray-alpha-400 bg-rd-gray-100 px-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+			{__('create_time')}
+		</span>
+	</span>
+	{
+		data.updatedDate && data.updatedDate.valueOf() !== data.pubDate.valueOf() && (
+			<span class={`group relative ${metaItemClass}`}>
+				<i class="fa-regular fa-wrench" aria-hidden="true"></i>&nbsp;
+				<time datetime={data.updatedDate.toISOString()}>{formatArticleDate(data.updatedDate)}</time>
+				<span class="pointer-events-none absolute top-6 left-1/2 z-10 w-max -translate-x-1/2 rounded-sm border border-rd-gray-alpha-400 bg-rd-gray-100 px-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+					{__('update_time')}
+				</span>
+			</span>
+		)
+	}
+
+	{
+		categories.length > 0 && (
+			<span class={`inline ${metaItemClass}`}>
+				<i class="fa-regular fa-folders" aria-hidden="true"></i>&nbsp;
+				<ul class="inline">
+					{categories.map((cat, i) => (
+						<li class="inline">
+							{i > 0 && <span> | </span>}
+							<a href={categoryUrl(cat)}>{cat}</a>&nbsp;
+						</li>
+					))}
+				</ul>
+			</span>
+		)
+	}
+	{
+		tags.length > 0 && (
+			<span class={`hidden md:inline ${metaItemClass}`}>
+				<i class="fa-regular fa-tags" aria-hidden="true"></i>&nbsp;
+				<ul class="inline">
+					{tags.map((tag, i) => (
+						<li class="inline">
+							{i > 0 && <span> | </span>}
+							<a href={tagUrl(tag)}>{tag}</a>&nbsp;
+						</li>
+					))}
+				</ul>
+			</span>
+		)
+	}
+
+	{
+		themeConfig.articles.word_count.enable && themeConfig.articles.word_count.count && wordCount !== undefined && (
+			<span class={metaItemClass}>
+				<i class="fa-regular fa-typewriter" aria-hidden="true"></i>&nbsp;{wordCount} {__('wordcount')}
+			</span>
+		)
+	}
+	{
+		themeConfig.articles.word_count.enable && themeConfig.articles.word_count.min2read && minutes !== undefined && (
+			<span class={metaItemClass}>
+				<i class="fa-regular fa-clock" aria-hidden="true"></i>&nbsp;{minutes} {__('min2read')}
+			</span>
+		)
+	}
+	{
+		themeConfig.global.website_counter.enable && themeConfig.global.website_counter.post_pv && (
+			<span class={metaItemClass}>
+				<i class="fa-regular fa-eye" aria-hidden="true"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+			</span>
+		)
+	}
+</div>

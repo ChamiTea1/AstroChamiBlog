@@ -1,20 +1,265 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
-import BlogPost from '../../layouts/BlogPost.astro';
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostMeta from '../../components/PostMeta.astro';
+import Copyright from '../../components/Copyright.astro';
+import Toc from '../../components/Toc.astro';
+import Comments from '../../components/Comments.astro';
+import Recommendation from '../../components/Recommendation.astro';
+import { siteConfig, themeConfig, getAuthorLabel } from '../../config';
+import { __ } from '../../i18n';
+import { sortPosts, getWordCount, normalizePostCover, type Post } from '../../utils/collections';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
 	return posts.map((post) => ({
 		params: { slug: post.id },
-		props: post,
+		props: { post },
 	}));
 }
-type Props = CollectionEntry<'blog'>;
 
-const post = Astro.props;
-const { Content } = await render(post);
+const { post } = Astro.props as { post: Post };
+const { Content, headings } = await render(post);
+const { data } = post;
+
+const sorted = sortPosts(await getCollection('blog'));
+const index = sorted.findIndex((p) => p.id === post.id);
+const prevPost = index > 0 ? sorted[index - 1] : null;
+const nextPost = index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : null;
+
+const cover = normalizePostCover(data);
+const showCover = cover && cover !== false;
+const author = (typeof data.author === 'string' && data.author) || siteConfig.author;
+const avatarImage = typeof data.avatar === 'object' && 'src' in data.avatar ? data.avatar : undefined;
+const authorLabel = themeConfig.articles.author_label.enable === true ? getAuthorLabel(sorted.length) : '';
+
+const { words, minutes } = getWordCount(post.body ?? '');
+
+const tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
+const tagUrl = (tag: string) => `/tags/${encodeURIComponent(tag.toLowerCase())}/`;
+
+const tocEnabled = themeConfig.articles.toc.enable === true && data.toc !== false;
+const titleAlignment = themeConfig.articles.style.title_alignment === 'center';
+
+const toolClass =
+	'mb-1 size-10 cursor-pointer items-center justify-center rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 text-lg text-rd-gray-1000 shadow-rd last:mb-0 hover:bg-primary hover:text-rd-primary-text sm:size-11 sm:text-xl [&_i]:!text-inherit';
+
+const description = data.description || data.og_description;
+const ogImage = typeof data.og_image === 'string' ? data.og_image : undefined;
+const showComments = themeConfig.comment.enable === true && data.comment !== false;
+const showExpires = Boolean(data.expires);
+const expiresLabel = __('expired', 'some');
+const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 ---
 
-<BlogPost {...post.data}>
-	<Content />
-</BlogPost>
+<BaseLayout title={data.title} description={description} image={ogImage}>
+	<div
+		id="main-content"
+		data-toc-state="closed"
+		class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out data-[toc-state=open]:!max-w-content-with-toc sm:w-6/7 md:w-4/5"
+	>
+		<div
+			id="article-layout"
+			class="article-layout relative flex h-full w-full box-border justify-between overflow-x-hidden sm:overflow-x-visible"
+			data-toc-state="closed"
+		>
+			<article
+				class="article box-border mb-4 max-w-screen rounded-none border-0 bg-rd-background-100 px-1 py-5 shadow-none transition-[width] duration-200 ease-in-out sm:mb-8 sm:max-w-none sm:rounded-2xl sm:border sm:border-rd-gray-alpha-400 sm:p-0 sm:shadow-rd"
+			>
+				<header class="relative w-full overflow-hidden rounded-none sm:rounded-t-[calc(1rem-1px)]">
+					{
+						showCover && (
+							<>
+								{typeof cover === 'string' ? (
+									<img src={cover} alt={data.title} class="h-60 w-full object-cover dark:brightness-75 sm:h-72 md:h-80" />
+								) : (
+									<Image src={cover} alt={data.title} class="h-60 w-full object-cover dark:brightness-75 sm:h-72 md:h-80" />
+								)}
+								<div class={`absolute bottom-0 flex w-full items-center ${titleAlignment ? 'justify-center' : 'justify-start'}`}>
+									<h1 class="mx-6 my-6 rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100/60 dark:bg-rd-background-100/40 px-4 py-3 text-center text-3xl font-semibold text-rd-gray-1000 backdrop-blur-lg md:text-4xl">
+										{data.title}
+									</h1>
+								</div>
+							</>
+						)
+					}
+					{
+						!showCover && (
+							<div class={`flex w-full items-center pt-6 ${titleAlignment ? 'justify-center' : 'justify-start'}`}>
+								<h1 class="px-2 py-3 text-3xl font-semibold tracking-tight text-rd-gray-1000 sm:px-6 md:px-8 md:text-4xl">
+									{data.title}
+								</h1>
+							</div>
+						)
+					}
+				</header>
+
+				<div class="mt-4 flex origin-top-left scale-90 flex-row items-center gap-2 px-2 sm:scale-100 sm:px-6 md:px-8">
+					<div class="size-12 shrink-0 rounded-xl border border-rd-gray-alpha-400 p-px">
+						{
+							avatarImage ? (
+								<Image src={avatarImage} alt={author} class="h-full w-full rounded-[calc(0.75rem-1px)]" />
+							) : (
+								<img src={themeConfig.defaults.avatar} alt={author} class="h-full w-full rounded-[calc(0.75rem-1px)]" />
+							)
+						}
+					</div>
+					<div class="flex flex-col justify-between">
+						<div class="flex items-center">
+							<span class="text-lg font-semibold text-rd-gray-1000">{author}</span>
+							{authorLabel && (
+								<span class="ml-1.5 rounded-sm border border-rd-gray-alpha-400 px-2 py-0.5 text-xs text-rd-gray-900">
+									{authorLabel}
+								</span>
+							)}
+						</div>
+						<PostMeta post={post} wordCount={words} minutes={minutes} />
+					</div>
+				</div>
+
+				{
+					showExpires && (
+						<aside
+							class="article-expire callout relative mx-2 mt-4 mb-4 flex flex-row items-center gap-2 rounded-xl border border-rd-gray-alpha-400 bg-(--callout-bg-color) p-3 pl-1 sm:mx-6 md:mx-8"
+							id="expiration-container"
+							data-kind="simple"
+							data-variant="red"
+							data-expires={data.expires!.toISOString()}
+							data-updated={updatedIso}
+							role="note"
+							hidden
+						>
+							<div aria-hidden="true" class="w-0.5 shrink-0 self-stretch rounded-full bg-(--callout-primary-color) opacity-60"></div>
+							<i class="expire-icon fa-solid fa-timer shrink-0 text-base text-(--callout-primary-color)" aria-hidden="true"></i>
+							<div class="markdown-body min-w-0 flex-1">
+								<span class="expire-label text-(--callout-primary-color)" id="expiration-date">{expiresLabel}</span>
+							</div>
+						</aside>
+					)
+				}
+
+				<div class="markdown-body mt-10 border-b border-rd-gray-alpha-400 px-2 pb-8 text-rd-gray-1000 [overflow-wrap:break-word] sm:px-6 md:px-8">
+					<Content />
+				</div>
+
+				{
+					themeConfig.articles.copyright.enable && (
+						<div class="my-8 w-full px-2 sm:px-6 md:px-8">
+							<Copyright post={post} />
+						</div>
+					)
+				}
+
+				{
+					tags.length > 0 && (
+						<ul class="mt-1.5 flex flex-wrap justify-center text-lg md:hidden">
+							{tags.map((tag) => (
+								<li class="mx-0.5">
+									<a href={tagUrl(tag)}>#{tag}</a>&nbsp;
+								</li>
+							))}
+						</ul>
+					)
+				}
+
+				<Recommendation post={post} />
+
+				{
+					(prevPost || nextPost) && (
+						<nav class="my-8 flex items-center justify-between px-2 sm:px-6 md:px-8" aria-label="Post navigation">
+							{
+								prevPost && (
+									<div class="rounded-xl border border-rd-gray-alpha-400 px-4 py-2">
+										<a class="relative block h-full w-full box-border pl-4" rel="prev" href={`/blog/${prevPost.id}/`}>
+											<span class="absolute top-0 left-0 flex h-full w-4 items-center justify-center">
+												<i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+											</span>
+											<span class="flex h-full w-full items-center justify-center">
+												<span class="hidden max-w-48 truncate md:inline">{prevPost.data.title}</span>
+												<span class="inline-block md:hidden">{__('prev_posts')}</span>
+											</span>
+										</a>
+									</div>
+								)
+							}
+							{
+								nextPost && (
+									<div class="rounded-xl border border-rd-gray-alpha-400 px-4 py-2">
+										<a class="relative block h-full w-full box-border pr-4" rel="next" href={`/blog/${nextPost.id}/`}>
+											<span class="flex h-full w-full items-center justify-center">
+												<span class="hidden max-w-48 truncate md:inline">{nextPost.data.title}</span>
+												<span class="inline-block md:hidden">{__('next_posts')}</span>
+											</span>
+											<span class="absolute top-0 right-0 flex h-full w-4 items-center justify-center">
+												<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+											</span>
+										</a>
+									</div>
+								)
+							}
+						</nav>
+					)
+				}
+				{
+					showComments && (
+						<div class="px-2 pb-8 sm:px-6 md:px-8">
+							<Comments postPath={`/blog/${post.id}/`} />
+						</div>
+					)
+				}
+			</article>
+
+			{
+				tocEnabled && (
+					<aside
+						id="article-toc"
+						class="toc sticky top-[calc(var(--current-navbar-height)+2.5rem)] float-right h-auto max-h-[calc(100vh-210px)] overflow-x-hidden overflow-y-auto p-2.5 whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none]"
+						data-expand={themeConfig.articles.toc.expand ? 'true' : 'false'}
+						aria-label={__('toc')}
+					>
+						<Toc headings={headings} title={data.title} />
+					</aside>
+				)
+			}
+		</div>
+	</div>
+
+	{
+		tocEnabled && (
+			<aside
+				slot="after-shell"
+				class="fixed top-[calc(var(--current-navbar-height)+2.5rem)] right-10 z-30 hidden transition-[top] duration-200 ease-in-out sm:block"
+			>
+				<div>
+					<button
+						id="toc-toggle"
+						type="button"
+						hidden
+						aria-controls="article-toc"
+						aria-expanded="false"
+						aria-label={__('toc')}
+						title={__('toc')}
+						class:list={['hidden', toolClass, 'lg:!flex']}
+					>
+						<i class="fa-regular fa-outdent" aria-hidden="true"></i>
+					</button>
+					{
+						showComments && (
+							<button
+								id="comment-jump"
+								type="button"
+								aria-controls="comments"
+								aria-label={__('comments')}
+								title={__('comments')}
+								class:list={['flex', toolClass]}
+							>
+								<i class="fa-regular fa-comments" aria-hidden="true"></i>
+							</button>
+						)
+					}
+				</div>
+			</aside>
+		)
+	}
+</BaseLayout>

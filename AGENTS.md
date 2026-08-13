@@ -1,22 +1,22 @@
-## Development
+## 开发
 
-When starting the dev server, use background mode:
+启动开发服务器时，请使用后台模式：
 
 ```
 astro dev --background
 ```
 
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
+使用 `astro dev stop`、`astro dev status` 和 `astro dev logs` 管理后台服务器。
 
-## Documentation
+## 文档
 
-Full documentation: https://docs.astro.build
+完整文档：https://docs.astro.build
 
-Consult these guides before working on related tasks:
+在处理相关任务前，请查阅以下指南：
 
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+- [添加页面、动态路由或中间件](https://docs.astro.build/en/guides/routing/)
+- [使用 Astro 组件](https://docs.astro.build/en/basics/astro-components/)
+- [使用 React、Vue、Svelte 或其他框架组件](https://docs.astro.build/en/guides/framework-components/)
+- [添加或管理内容](https://docs.astro.build/en/guides/content-collections/)
+- [添加样式或使用 Tailwind](https://docs.astro.build/en/guides/styling/)
+- [支持多语言](https://docs.astro.build/en/guides/internationalization/)

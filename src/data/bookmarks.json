@@ -1,0 +1,17 @@
+[
+	{
+		"category": "Development",
+		"icon": "fa-code",
+		"items": [
+			{ "name": "Astro Docs", "link": "https://docs.astro.build", "description": "Astro documentation", "image": "" },
+			{ "name": "GitHub", "link": "https://github.com", "description": "Where the world builds software", "image": "" }
+		]
+	},
+	{
+		"category": "Resources",
+		"icon": "fa-bookmark",
+		"items": [
+			{ "name": "Redefine Docs", "link": "https://redefine-docs.ohevan.com", "description": "Theme documentation", "image": "" }
+		]
+	}
+]

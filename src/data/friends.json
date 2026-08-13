@@ -1,0 +1,19 @@
+[
+	{
+		"links_category": "Friends",
+		"has_thumbnail": false,
+		"list": [
+			{ "name": "EvanNotFound", "link": "https://ohevan.com", "description": "Author of Redefine", "avatar": "https://avatars.githubusercontent.com/u/68590232" },
+			{ "name": "Astro", "link": "https://astro.build", "description": "The web framework for content-driven websites", "avatar": "" },
+			{ "name": "Example Friend", "link": "https://example.com", "description": "A friend's blog", "avatar": "" }
+		]
+	},
+	{
+		"links_category": "Links",
+		"has_thumbnail": true,
+		"list": [
+			{ "name": "Example Site", "link": "https://example.com", "description": "Cool site", "avatar": "", "thumbnail": "/images/wallhaven-wqery6-light.webp" },
+			{ "name": "Another Site", "link": "https://example.org", "description": "Another cool site", "avatar": "", "thumbnail": "/images/wallhaven-wqery6-dark.webp" }
+		]
+	}
+]
