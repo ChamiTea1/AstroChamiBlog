@@ -1584,6 +1584,46 @@
 	}
 
 	/* ---------------------------------------------------------- */
+	/* Inline APlayer ({% audio %} tags)                           */
+	/* ---------------------------------------------------------- */
+
+	function initInlineAPlayer() {
+		const containers = $$('.aplayer-inline');
+		if (!containers.length) return;
+
+		const initAll = () => {
+			containers.forEach((el) => {
+				if (el.dataset.ready) return;
+				let data = {};
+				try {
+					data = JSON.parse(el.getAttribute('data-audio') || '{}');
+				} catch {
+					/* ignore */
+				}
+				if (!data.url) return;
+				el.dataset.ready = 'true';
+				new APlayer({
+					container: el,
+					mini: false,
+					autoplay: false,
+					mutex: true,
+					audio: [data],
+				});
+			});
+		};
+
+		if (typeof APlayer !== 'undefined') {
+			initAll();
+			return;
+		}
+
+		const script = document.createElement('script');
+		script.src = '/scripts/APlayer.min.js';
+		script.onload = initAll;
+		document.body.appendChild(script);
+	}
+
+	/* ---------------------------------------------------------- */
 	/* APlayer                                                     */
 	/* ---------------------------------------------------------- */
 
@@ -1942,6 +1982,7 @@
 		initPangu();
 		initMermaid();
 		initAPlayer();
+		initInlineAPlayer();
 		initEssays();
 		initBookmarkNav();
 		initMasonry();

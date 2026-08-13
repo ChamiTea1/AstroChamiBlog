@@ -444,11 +444,48 @@ const BLOCK_TAGS: Record<string, (args: string[], body: Node[]) => string> = {
 	buttons: renderGrid,
 };
 
-const INLINE_TAGS = new Set(['button', 'btn', 'cell']);
+const INLINE_TAGS = new Set(['button', 'btn', 'cell', 'audio', 'bilibili']);
 
 const OPEN_TAG_REGEX = /^\{%\s*(?!end[\w-])([\w-]+)([^%]*?)%\}$/;
 const END_TAG_REGEX = /^\{%\s*end([\w-]+)\s*%\}$/;
-const INLINE_TAG_REGEX = /\{%\s*(button|btn|cell)\s+([^%]*?)%\}/g;
+const INLINE_TAG_REGEX = /\{%\s*(button|btn|cell|audio|bilibili)\s+([^%]*?)%\}/g;
+
+/* ---------------------------------------------------------- */
+/* Bilibili embed ({% bilibili BVxxx [page] %})                 */
+/* ---------------------------------------------------------- */
+
+function renderBilibili(args: string[]): string {
+	const parsed = parseTagArgs(args);
+	const source = (parsed.named.bvid || parsed.named.url || parsed.positional[0] || '').trim();
+	if (!source) return '';
+	let bvid = source;
+	const bvMatch = source.match(/BV[0-9A-Za-z]+/);
+	if (bvMatch) bvid = bvMatch[0];
+	const pageRaw = parsed.named.p || parsed.positional[1] || '1';
+	const page = Number(pageRaw) > 0 ? String(Number(pageRaw)) : '1';
+	return `<div class="bilibili-player"><iframe src="https://player.bilibili.com/player.html?isOutside=true&bvid=${escapeHtml(bvid)}&p=${escapeHtml(page)}&autoplay=0&danmaku=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" loading="lazy"></iframe></div>`;
+}
+
+/* ---------------------------------------------------------- */
+/* Inline APlayer ({% audio 歌名, 歌手, url, cover %})          */
+/* ---------------------------------------------------------- */
+
+function renderAudio(args: string[]): string {
+	const parsed = parseTagArgs(args);
+	const name = (parsed.named.name || parsed.positional[0] || '').trim();
+	const artist = (parsed.named.artist || parsed.positional[1] || '').trim();
+	const url = (parsed.named.url || parsed.positional[2] || '').trim();
+	const cover = (parsed.named.cover || parsed.positional[3] || '').trim();
+	if (!url) return '';
+	const data = JSON.stringify({ name: name || 'Audio', artist, url, cover });
+	return `<div class="aplayer-inline my-4" data-audio="${escapeHtml(data)}"></div>`;
+}
+
+function renderInlineTag(tagName: string, args: string[]): string {
+	if (tagName === 'bilibili') return renderBilibili(args);
+	if (tagName === 'audio') return renderAudio(args);
+	return renderButton(args);
+}
 
 function nodeText(node: Node): string {
 	if (node.type === 'text' || node.type === 'html') return node.value || '';
@@ -484,7 +521,7 @@ function processInlineTags(node: Node) {
 			if (match.index > lastIndex) {
 				segments.push({ type: 'text', value: text.slice(lastIndex, match.index) });
 			}
-			segments.push({ type: 'html', value: renderButton([match[2]]) });
+			segments.push({ type: 'html', value: renderInlineTag(match[1], [match[2]]) });
 			lastIndex = INLINE_TAG_REGEX.lastIndex;
 		}
 		if (lastIndex < text.length) {
@@ -684,7 +721,7 @@ function processTagParagraph(parent: Node, index: number, text: string): 'block'
 		INLINE_TAG_REGEX.lastIndex = 0;
 		while ((match = INLINE_TAG_REGEX.exec(text)) !== null) {
 			if (match.index > lastIndex) segments.push(text.slice(lastIndex, match.index));
-			segments.push(renderButton([match[2]]));
+			segments.push(renderInlineTag(match[1], [match[2]]));
 			lastIndex = INLINE_TAG_REGEX.lastIndex;
 		}
 		if (lastIndex < text.length) segments.push(text.slice(lastIndex));
