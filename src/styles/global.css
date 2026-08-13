@@ -185,12 +185,51 @@
 		border: 0;
 	}
 
-	/* Inline APlayer */
+	/* Inline APlayer (container) */
 	.aplayer-inline {
 		margin: 1.25rem 0;
 	}
+}
 
-	.aplayer-inline .aplayer {
-		border-radius: 12px;
-	}
+/* ------------------------------------------------------------------ */
+/* Inline APlayer card (non-layered overrides of bundled aplayer.css)  */
+/* ------------------------------------------------------------------ */
+
+.aplayer-inline .aplayer {
+	margin: 0;
+	overflow: visible;
+	background: var(--rd-background-100);
+	border: 1px solid var(--rd-gray-alpha-400);
+	border-radius: 16px;
+	box-shadow: var(--rd-shadow);
+	transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease;
+}
+
+.aplayer-inline .aplayer:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 12px 36px rgb(0 0 0 / 10%);
+}
+
+.aplayer-inline .aplayer .aplayer-pic {
+	margin: 6px 0 6px 6px;
+	border-radius: 10px;
+}
+
+.aplayer-inline .aplayer .aplayer-info {
+	border: 0;
+	background: transparent;
+}
+
+.aplayer-inline .aplayer .aplayer-info .aplayer-music,
+.aplayer-inline .aplayer .aplayer-info .aplayer-music .aplayer-title {
+	color: var(--rd-gray-1000);
+}
+
+.aplayer-inline .aplayer .aplayer-info .aplayer-music .aplayer-author {
+	color: var(--rd-gray-900);
+}
+
+.dark .aplayer-inline .aplayer svg path,
+.dark .aplayer-inline .aplayer svg circle {
+	fill: var(--rd-gray-1000);
 }
