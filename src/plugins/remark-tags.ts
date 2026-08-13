@@ -467,7 +467,10 @@ function renderBilibili(args: string[]): string {
 }
 
 /* ---------------------------------------------------------- */
-/* Inline APlayer ({% audio 歌名, 歌手, url, cover %})          */
+/* Inline MetingJS player ({% audio ... %})                     */
+/*   {% audio https://music.163.com/song?id=xxx %}              */
+/*   {% audio 歌名, 歌曲ID, 平台 %}                              */
+/*   {% audio name="..." id="..." server="netease" %}           */
 /* ---------------------------------------------------------- */
 
 function renderAudio(args: string[]): string {
@@ -478,34 +481,45 @@ function renderAudio(args: string[]): string {
 		.trim();
 	if (!raw) return '';
 
-	let name = '';
-	let artist = '';
-	let url = '';
-	let cover = '';
+	const attrs: string[] = [];
 
-	const named: Record<string, string> = {};
-	const namedRegex = /(name|artist|url|cover)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s,]+))/g;
-	let match: RegExpExecArray | null;
-	while ((match = namedRegex.exec(raw)) !== null) {
-		named[match[1]] = match[2] ?? match[3] ?? match[4] ?? '';
-	}
-
-	if (Object.keys(named).length > 0) {
-		name = named.name || '';
-		artist = named.artist || '';
-		url = named.url || '';
-		cover = named.cover || '';
+	const looksLikeLink = /^(?:https?:\/\/)?(?:music\.163\.com|y\.qq\.com|xiami\.com|kugou\.com|kuwo\.cn)/i.test(raw);
+	if (looksLikeLink) {
+		attrs.push(`auto="${escapeHtml(raw)}"`);
 	} else {
-		const parts = raw.split(',').map((part) => part.trim()).filter(Boolean);
-		name = parts[0] || '';
-		artist = parts[1] || '';
-		url = parts[2] || '';
-		cover = parts[3] || '';
+		const named: Record<string, string> = {};
+		const namedRegex = /(name|artist|url|cover|id|server|type|auto)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s,]+))/g;
+		let match: RegExpExecArray | null;
+		while ((match = namedRegex.exec(raw)) !== null) {
+			named[match[1]] = match[2] ?? match[3] ?? match[4] ?? '';
+		}
+
+		if (Object.keys(named).length > 0) {
+			if (named.auto) attrs.push(`auto="${escapeHtml(named.auto)}"`);
+			if (named.id) attrs.push(`id="${escapeHtml(named.id)}"`);
+			if (named.server) attrs.push(`server="${escapeHtml(named.server)}"`);
+			if (named.type) attrs.push(`type="${escapeHtml(named.type)}"`);
+			if (named.name) attrs.push(`name="${escapeHtml(named.name)}"`);
+			if (named.artist) attrs.push(`artist="${escapeHtml(named.artist)}"`);
+			if (named.url) attrs.push(`url="${escapeHtml(named.url)}"`);
+			if (named.cover) attrs.push(`cover="${escapeHtml(named.cover)}"`);
+		} else {
+			const parts = raw.split(',').map((part) => part.trim()).filter(Boolean);
+			const first = parts[0] || '';
+			if (first) attrs.push(`name="${escapeHtml(first)}"`);
+			if (parts[1]) attrs.push(`id="${escapeHtml(parts[1])}"`);
+			if (parts[2]) attrs.push(`server="${escapeHtml(parts[2])}"`);
+		}
 	}
 
-	if (!url) return '';
-	const data = JSON.stringify({ name: name || 'Audio', artist, url, cover });
-	return `<div class="aplayer-inline my-4" data-audio="${escapeHtml(data)}"></div>`;
+	const hasSource = attrs.some((a) => a.startsWith('auto=') || a.startsWith('id=') || a.startsWith('url='));
+	if (!hasSource) return '';
+	const hasServer = attrs.some((a) => a.startsWith('server='));
+	const serverAttr = hasServer ? '' : ' server="netease"';
+	const hasType = attrs.some((a) => a.startsWith('type='));
+	const typeAttr = hasType ? '' : ' type="song"';
+
+	return `<div class="aplayer-inline my-4"><meting-js${serverAttr}${typeAttr} mutex="true" preload="none" theme="var(--primary-color)" order="list" ${attrs.join(' ')}></meting-js></div>`;
 }
 
 function renderInlineTag(tagName: string, args: string[]): string {

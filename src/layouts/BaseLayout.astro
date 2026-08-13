@@ -141,6 +141,9 @@ const injectFooter = (themeConfig.inject.enable ? themeConfig.inject.footer : []
 		}
 
 		<script is:inline set:html={`window.theme = ${clientConfig}; window.lang_ago = ${langAgo}; window.i18n = ${i18nJson};`}></script>
+		{themeConfig.plugins.meting_api && (
+			<script is:inline set:html={`var meting_api = ${JSON.stringify(themeConfig.plugins.meting_api)};`}></script>
+		)}
 		{hasTypedSubtitle && <script defer src="/scripts/Typed.min.js"></script>}
 		{preloaderEnabled && <script defer src="/scripts/anime.min.js"></script>}
 		{themeConfig.articles.pangu_js && <script defer src="/scripts/pangu.min.js"></script>}

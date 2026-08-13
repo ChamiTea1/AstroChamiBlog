@@ -49,7 +49,7 @@ cover: '/images/zenless/come-alive.jpg'
 
 音乐同样值得单独一夸。HOYO-MiX 为它创作了大量电子、爵士、嘻哈风格的曲目，战斗曲的鼓点和城市的霓虹简直天生一对。下面这首《覆灭重生 Come Alive》是公测前的主题曲，戴上耳机感受一下：
 
-{% audio 覆灭重生 Come Alive, 三Z-STUDIO/HOYO-MiX, https://music.163.com/song/media/outer/url?id=2604937294.mp3, /images/zenless/come-alive.jpg %}
+{% audio https://music.163.com/song?id=2604937294 %}
 
 除了主题曲，游戏还发布了大量高质量单曲，每一张封面都是独立的视觉设计：
 

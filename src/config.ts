@@ -358,6 +358,8 @@ export const themeConfig = {
 				dark: 'dark',
 			},
 		},
+		// MetingJS 自定义解析 API（留空则用默认公共 API），参考 LuviciiBlog 的 asset.meting_api
+		meting_api: '',
 	},
 
 	inject: {
