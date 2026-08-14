@@ -13,6 +13,9 @@ const { data } = post;
 
 const cover = normalizePostCover(data);
 const showCover = cover !== false;
+// 封面位置：top（默认，上下排布）| left | right
+const coverPosition = data.coverPosition === 'left' || data.coverPosition === 'right' ? data.coverPosition : 'top';
+const isHorizontal = coverPosition === 'left' || coverPosition === 'right';
 
 const excerpt = getExcerpt(post, themeConfig.home.excerpt_length);
 
@@ -40,7 +43,10 @@ const postUrl = `/blog/${post.id}/`;
 
 <li
 	data-home-card
-	class="relative flex box-border flex-col mb-6 overflow-hidden rounded-2xl ring-inset ring ring-rd-gray-alpha-400 bg-rd-background-100 sm:mb-8 md:mb-10 group"
+	class:list={[
+		'relative flex box-border mb-6 overflow-hidden rounded-2xl ring-inset ring ring-rd-gray-alpha-400 bg-rd-background-100 sm:mb-8 md:mb-10 group',
+		isHorizontal ? 'flex-row' : 'flex-col',
+	]}
 >
 	{
 		data.sticky && (
@@ -51,20 +57,39 @@ const postUrl = `/blog/${post.id}/`;
 	}
 
 	{
-		showCover && (
-			<div class="relative -mb-1 h-40 w-full overflow-hidden">
-				<a href={postUrl}>
+		showCover && (coverPosition === 'top' || coverPosition === 'left') && (
+			<div
+				class:list={[
+					'relative shrink-0 overflow-hidden',
+					isHorizontal ? 'w-2/5 self-stretch sm:w-1/3' : '-mb-1 h-40 w-full',
+				]}
+			>
+				<a href={postUrl} class:list={[isHorizontal && 'block h-full w-full']}>
 					{typeof cover === 'string' ? (
-						<img src={cover} alt={data.title} class="absolute top-1/2 h-full w-full -translate-y-1/2 object-cover transition-all dark:brightness-75 group-hover:scale-102 duration-500" />
+						<img
+							src={cover}
+							alt={data.title}
+							class:list={[
+								'transition-all dark:brightness-75 group-hover:scale-102 duration-500 object-cover',
+								isHorizontal ? 'h-full w-full' : 'absolute top-1/2 h-full w-full -translate-y-1/2',
+							]}
+						/>
 					) : (
-						<Image src={cover} alt={data.title} class="absolute top-1/2 h-full w-full -translate-y-1/2 object-cover transition-all dark:brightness-75 group-hover:scale-102 duration-500" />
+						<Image
+							src={cover}
+							alt={data.title}
+							class:list={[
+								'transition-all dark:brightness-75 group-hover:scale-102 duration-500 object-cover',
+								isHorizontal ? 'h-full w-full' : 'absolute top-1/2 h-full w-full -translate-y-1/2',
+							]}
+						/>
 					)}
 				</a>
 			</div>
 		)
 	}
 
-	<div class="flex flex-col gap-4 p-6">
+	<div class:list={['flex flex-col gap-4 p-6', isHorizontal && 'min-w-0 flex-1']}>
 		<h3 class="relative m-0 font-[family-name:var(--font-article-title)] text-xl leading-normal font-semibold text-rd-gray-1000 sm:text-xl">
 			<a href={postUrl}>{data.title}</a>
 		</h3>
@@ -122,4 +147,18 @@ const postUrl = `/blog/${post.id}/`;
 			</a>
 		</div>
 	</div>
+
+	{
+		showCover && coverPosition === 'right' && (
+			<div class="relative w-2/5 shrink-0 self-stretch overflow-hidden sm:w-1/3">
+				<a href={postUrl} class="block h-full w-full">
+					{typeof cover === 'string' ? (
+						<img src={cover} alt={data.title} class="h-full w-full object-cover transition-all dark:brightness-75 group-hover:scale-102 duration-500" />
+					) : (
+						<Image src={cover} alt={data.title} class="h-full w-full object-cover transition-all dark:brightness-75 group-hover:scale-102 duration-500" />
+					)}
+				</a>
+			</div>
+		)
+	}
 </li>

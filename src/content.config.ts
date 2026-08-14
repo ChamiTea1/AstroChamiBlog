@@ -25,6 +25,7 @@ const blog = defineCollection({
 			tag: z.string().optional(),
 			// Redefine-specific frontmatter
 			sticky: z.boolean().optional(),
+			coverPosition: z.enum(['top', 'left', 'right']).optional(),
 			license: z.string().optional(),
 			copyright: z.string().optional(),
 			avatar: z.union([z.string(), image()]).optional(),

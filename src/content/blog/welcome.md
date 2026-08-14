@@ -6,6 +6,8 @@ tags:
 categories:
   - 随笔
 description: 新博客开张啦，记录生活与学习的点点滴滴。
+cover: 'https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/avatar/shaoye.jpg'
+coverPosition: 'right'
 ---
 
 你好呀，欢迎来到 **茶糜的小站** 👋
