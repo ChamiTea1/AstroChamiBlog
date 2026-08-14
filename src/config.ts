@@ -32,7 +32,7 @@ export const themeConfig = {
 	},
 
 	colors: {
-		primary: '#A31F34',
+		primary: '#39c5bb',
 		default_mode: 'light' as 'light' | 'dark',
 	},
 
