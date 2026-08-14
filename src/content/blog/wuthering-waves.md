@@ -8,7 +8,7 @@ tags:
   - 库洛游戏
 categories:
   - 游戏
-cover: '/images/wuthering/ww-cover.jpg'
+cover: 'https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-cover.jpg'
 ---
 
 2024 年 5 月 23 日，库洛游戏的新作《鸣潮》（Wuthering Waves）正式全球公测。作为《战双帕弥什》之后库洛的第二款旗舰产品，它把末世科幻与东方美学揉在了一起，交出了一个和《原神》风格迥异的开放世界。先看概念 CG 感受一下：
@@ -73,33 +73,33 @@ cover: '/images/wuthering/ww-cover.jpg'
 
 {% grid 2 %}
 
-![《Waking of a World》单曲封面](/images/wuthering/ww-01.jpg)
+![《Waking of a World》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-01.jpg)
 
-![《无名长诗》单曲封面](/images/wuthering/ww-02.jpg)
+![《无名长诗》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-02.jpg)
 
-![《定玄》单曲封面](/images/wuthering/ww-03.jpg)
+![《定玄》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-03.jpg)
 
-![《真伪之塔》单曲封面](/images/wuthering/ww-04.jpg)
+![《真伪之塔》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-04.jpg)
 
-![《旧夜群星闪耀时》单曲封面](/images/wuthering/ww-05.jpg)
+![《旧夜群星闪耀时》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-05.jpg)
 
-![《Against the Tide》单曲封面](/images/wuthering/ww-06.jpg)
+![《Against the Tide》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-06.jpg)
 
 {% endgrid %}
 
 {% grid 2 %}
 
-![《星轨消逝之夜》单曲封面](/images/wuthering/ww-07.jpg)
+![《星轨消逝之夜》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-07.jpg)
 
-![《万声弥新》单曲封面](/images/wuthering/ww-08.jpg)
+![《万声弥新》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-08.jpg)
 
-![《梦寐深海》单曲封面](/images/wuthering/ww-09.jpg)
+![《梦寐深海》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-09.jpg)
 
-![《星炬不熄》单曲封面](/images/wuthering/ww-10.jpg)
+![《星炬不熄》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-10.jpg)
 
-![《飞行雪绒》单曲封面](/images/wuthering/ww-11.jpg)
+![《飞行雪绒》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-11.jpg)
 
-![《RUNNING FOR YOUR LIFE》单曲封面](/images/wuthering/ww-12.jpg)
+![《RUNNING FOR YOUR LIFE》单曲封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-12.jpg)
 
 {% endgrid %}
 
@@ -109,7 +109,7 @@ cover: '/images/wuthering/ww-cover.jpg'
 
 今汐（Jinhsi）是鸣潮 1.1 版本登场的核心角色——今州令尹、时序之神的共鸣者。她与漂泊者的羁绊、以及「清平之愿」背后的故事，是游戏前期剧情最动人的段落之一。
 
-![今汐 PV 封面](/images/wuthering/ww-jinxi.jpg)
+![今汐 PV 封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-jinxi.jpg)
 
 ## 版本演进
 
@@ -117,7 +117,7 @@ cover: '/images/wuthering/ww-cover.jpg'
 
 {% bilibili BV1d6kmYuEox %}
 
-![鸣潮 2.0 版本 PV 封面](/images/wuthering/ww-pv2.jpg)
+![鸣潮 2.0 版本 PV 封面](https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/wuthering/ww-pv2.jpg)
 
 ## 结语
 
