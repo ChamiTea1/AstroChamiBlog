@@ -5,7 +5,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Copyright from '../../components/Copyright.astro';
 import PostAside from '../../components/PostAside.astro';
 import Comments from '../../components/Comments.astro';
-import Recommendation from '../../components/Recommendation.astro';
 import PostPagination from '../../components/PostPagination.astro';
 import { siteConfig, themeConfig, getAuthorLabel } from '../../config';
 import { __, i18n, formatDate } from '../../i18n';
@@ -191,8 +190,6 @@ const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 					)
 				}
 
-				<Recommendation post={post} />
-
 				<PostPagination prev={prevPost} next={nextPost} />
 				{
 					showComments && (
@@ -203,7 +200,7 @@ const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 				}
 			</article>
 
-			{tocEnabled && <PostAside headings={headings} title={data.title} author={author} />}
+			<PostAside headings={headings} title={data.title} author={author} post={post} showToc={tocEnabled} />
 		</div>
 	</div>
 
