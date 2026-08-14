@@ -55,6 +55,34 @@ const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 ---
 
 <BaseLayout title={data.title} description={description} image={ogImage}>
+	{
+		showCover && (
+			<div slot="banner" aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+				{typeof cover === 'string' ? (
+					<img
+						src={cover}
+						alt=""
+						class="h-full w-full scale-110 object-cover blur-[28px] brightness-105 dark:brightness-75 dark:saturate-[0.85]"
+					/>
+				) : (
+					<Image
+						src={cover}
+						alt=""
+						class="h-full w-full scale-110 object-cover blur-[28px] brightness-105 dark:brightness-75 dark:saturate-[0.85]"
+					/>
+				)}
+				<div
+					class="absolute inset-0 dark:hidden"
+					style="background: linear-gradient(to bottom, color-mix(in srgb, var(--rd-background-100) 45%, transparent), color-mix(in srgb, var(--rd-background-100) 78%) 55%, var(--rd-background-100) 100%);"
+				></div>
+				<div
+					class="absolute inset-0 hidden dark:block"
+					style="background: linear-gradient(to bottom, color-mix(in srgb, var(--rd-background-100) 58%, transparent), color-mix(in srgb, var(--rd-background-100) 84%) 55%, var(--rd-background-100) 100%);"
+				></div>
+			</div>
+		)
+	}
+
 	<div
 		id="main-content"
 		class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5 min-[1200px]:w-auto min-[1200px]:max-w-content-with-toc"
