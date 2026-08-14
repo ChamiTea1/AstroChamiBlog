@@ -36,8 +36,6 @@ const isOriginal = !data.author || data.author === siteConfig.author;
 const dateTimeFormat = 'YYYY-MM-DD HH:mm:ss';
 const postUrl = `${siteConfig.url.replace(/\/$/, '')}/blog/${post.id}/`;
 
-const tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
-const tagUrl = (tag: string) => `/tags/${encodeURIComponent(tag.toLowerCase())}/`;
 
 const hasLicenseDetail = Boolean(licenseHtml) || Boolean(data.updatedDate && data.updatedDate.valueOf() !== data.pubDate.valueOf());
 ---
@@ -83,21 +81,8 @@ const hasLicenseDetail = Boolean(licenseHtml) || Boolean(data.updatedDate && dat
 							<span set:html={licenseHtml} />
 						</span>
 					)
-				}
-			</div>
-		)
-	}
-
-	{
-		tags.length > 0 && (
-			<div class="mt-4 flex flex-wrap items-center justify-center gap-2">
-				{tags.map((tag) => (
-					<a href={tagUrl(tag)} class="flex items-center gap-1 rounded-lg border border-rd-gray-alpha-400 bg-rd-background-100 px-2.5 py-1 text-xs text-rd-gray-900 transition-colors hover:!border-primary hover:!text-primary">
-						<i class="fa-regular fa-tag" aria-hidden="true"></i>
-						{tag}
-					</a>
-				))}
-			</div>
-		)
-	}
+ 				}
+ 			</div>
+ 		)
+ 	}
 </div>
