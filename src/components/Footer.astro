@@ -53,24 +53,6 @@ const showYearRange = startYear !== null && startYear !== currentYear;
 				</div>
 			)}
 		</div>
-		{
-			themeConfig.global.website_counter.enable && (
-				<div class="order-2 min-w-0 lg:col-start-3 lg:row-start-1 lg:text-right flex flex-col items-center sm:items-end">
-					{themeConfig.global.website_counter.site_uv && (
-						<div id="busuanzi_container_site_uv" class="text-sm">
-							<span>{__('site_uv')}</span>
-							<span id="busuanzi_value_site_uv"></span>
-						</div>
-					)}
-					{themeConfig.global.website_counter.site_pv && (
-						<div id="busuanzi_container_site_pv" class="text-sm">
-							<span>{__('site_pv')}</span>
-							<span id="busuanzi_value_site_pv"></span>
-						</div>
-					)}
-				</div>
-			)
-		}
 		<div class="order-3 min-w-0 lg:col-start-1 lg:row-start-1 flex flex-col items-center sm:items-start">
 			<div class="text-sm font-light">
 				<span set:html={__('powered_by', '<a target="_blank" class="text-sm" href="https://astro.build">Astro</a>')} />

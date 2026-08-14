@@ -92,9 +92,11 @@
 		}
 		if (modeToggleInitialized) return;
 		modeToggleInitialized = true;
-		const toggle = $('#theme-toggle');
-		toggle?.addEventListener('click', () => {
-			applyTheme(!document.documentElement.classList.contains('dark'));
+		// 事件委托：swup 切换页面后元素会被替换，委托在 document 上才能持续生效
+		document.addEventListener('click', (event) => {
+			if (event.target.closest('#theme-toggle')) {
+				applyTheme(!document.documentElement.classList.contains('dark'));
+			}
 		});
 	}
 
@@ -201,9 +203,12 @@
 	function initSideTools() {
 		if (!sideToolsInitialized) {
 			sideToolsInitialized = true;
-			$('#side-tools-toggle')?.addEventListener('click', () => {
-				toolsMenuOpen = !toolsMenuOpen;
-				applyToolsMenuState();
+			// 事件委托：swup 切换页面后按钮元素会被替换
+			document.addEventListener('click', (event) => {
+				if (event.target.closest('#side-tools-toggle')) {
+					toolsMenuOpen = !toolsMenuOpen;
+					applyToolsMenuState();
+				}
 			});
 		}
 		applyToolsMenuState();
@@ -538,7 +543,9 @@
 	function initTocToggleButton() {
 		if (tocToggleInitialized) return;
 		tocToggleInitialized = true;
-		$('#toc-toggle')?.addEventListener('click', () => {
+		// 事件委托：swup 切换页面后按钮元素会被替换
+		document.addEventListener('click', (event) => {
+			if (!event.target.closest('#toc-toggle')) return;
 			const card = $('#article-toc');
 			if (!card) return;
 			const isOpen = card.dataset.state !== 'open';
@@ -551,11 +558,13 @@
 	/* Jump to comments                                            */
 	/* ---------------------------------------------------------- */
 
+	let goCommentInitialized = false;
 	function initGoComment() {
-		const goCommentDom = $('#comment-jump');
-		if (!goCommentDom || goCommentDom.dataset.initialized) return;
-		goCommentDom.dataset.initialized = 'true';
-		goCommentDom.addEventListener('click', () => {
+		if (goCommentInitialized) return;
+		goCommentInitialized = true;
+		// 事件委托：swup 切换页面后按钮元素会被替换
+		document.addEventListener('click', (event) => {
+			if (!event.target.closest('#comment-jump')) return;
 			const target = $('#comments');
 			if (!target) return;
 			const offset = target.getBoundingClientRect().top + window.scrollY;
@@ -595,6 +604,7 @@
 			setValue('runtime_hours', hours);
 			setValue('runtime_minutes', minutes);
 			setValue('runtime_seconds', seconds);
+			setValue('sidebar-runtime-days', days);
 		};
 
 		tick();
