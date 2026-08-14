@@ -34,7 +34,13 @@ const recentCover = (post: (typeof posts)[number]) => {
 };
 ---
 
-<aside class:list={[sidebarPosition, 'hidden w-60 shrink-0 md:block']}>
+<aside
+	class:list={[
+		sidebarPosition,
+		'hidden w-60 shrink-0 md:block',
+		'sticky post-home-aside',
+	]}
+>
 	{/* 作者卡片 */}
 	<div class="rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 p-5 shadow-rd">
 		<div class="flex flex-col items-center">
@@ -87,8 +93,8 @@ const recentCover = (post: (typeof posts)[number]) => {
 		)
 	}
 
-	{/* 吸顶容器：标签云 / 归档 / 网站资讯 / 最新文章 */}
-	<div class="sticky top-[calc(var(--current-navbar-height)+1rem)] mt-5 flex flex-col gap-5">
+	{/* 标签云 / 归档 / 网站资讯 / 最新文章 */}
+	<div class="mt-5 flex flex-col gap-5">
 		{
 			tags.length > 0 && (
 				<div class="rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 p-5 shadow-rd">

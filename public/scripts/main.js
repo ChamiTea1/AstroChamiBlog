@@ -216,6 +216,31 @@
 	}
 
 	/* ---------------------------------------------------------- */
+	/* 首页侧栏滚动钳位：同步滚动，底部不超过屏幕中间              */
+	/* ---------------------------------------------------------- */
+
+	function updateSidebarClamp() {
+		const aside = $('.post-home-aside');
+		if (!aside) return;
+		const navH = parseFloat(getComputedStyle(document.body).getPropertyValue('--current-navbar-height')) || 72;
+		const maxTop = navH + 16;
+		const halfViewport = window.innerHeight / 2;
+		const height = aside.offsetHeight;
+		// 侧栏不超过半屏：正常吸顶；超过半屏：让底部（最新文章）停在屏幕中间
+		const top = height >= halfViewport ? halfViewport - height : maxTop;
+		aside.style.top = `${Math.round(top)}px`;
+	}
+
+	let sidebarClampInitialized = false;
+	function initSidebarClamp() {
+		if (!sidebarClampInitialized) {
+			sidebarClampInitialized = true;
+			window.addEventListener('resize', updateSidebarClamp, { passive: true });
+		}
+		updateSidebarClamp();
+	}
+
+	/* ---------------------------------------------------------- */
 	/* Scroll progress + scroll buttons                             */
 	/* ---------------------------------------------------------- */
 
@@ -1983,6 +2008,7 @@
 	function initPage() {
 		initNavbarPage();
 		initSideTools();
+		initSidebarClamp();
 		initHomeBanner();
 		initTyped();
 		relativeTimeInHome();
