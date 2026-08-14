@@ -55,6 +55,10 @@ function wrapCodeBlocks(tree: Node) {
 						.find((cls) => cls.startsWith('language-'));
 					if (match) lang = match.slice('language-'.length);
 				}
+				// 数学公式由 rehype-katex 接管，不包代码容器
+				if (lang === 'math') {
+					continue;
+				}
 				if (['plain', 'plaintext', 'text'].includes(lang)) lang = 'code';
 				const label = lang.charAt(0).toUpperCase() + lang.slice(1);
 				const wrapper: Node = {
