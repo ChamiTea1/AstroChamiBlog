@@ -7,7 +7,9 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import remarkRehype from 'remark-rehype';
+import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import rehypeStringify from 'rehype-stringify';
 import { rehypeExternalLinks, rehypeDeleteMask, rehypeTableScroll, rehypeLazyload } from './rehype-filters.ts';
@@ -38,8 +40,10 @@ function getMiniRenderer() {
 	if (!miniRenderer) {
 		miniRenderer = unified()
 			.use(applyTagTransformer)
+			.use(remarkMath)
 			.use(remarkGfm)
 			.use(remarkRehype, { allowDangerousHtml: true })
+			.use(rehypeKatex)
 			.use(rehypeExternalLinks)
 			.use(rehypeDeleteMask)
 			.use(rehypeTableScroll)
@@ -65,8 +69,10 @@ export function renderMarkdownString(markdown: string): string {
 		stringRenderer = unified()
 			.use(remarkParse)
 			.use(applyTagTransformer)
+			.use(remarkMath)
 			.use(remarkGfm)
 			.use(remarkRehype, { allowDangerousHtml: true })
+			.use(rehypeKatex)
 			.use(rehypeExternalLinks)
 			.use(rehypeDeleteMask)
 			.use(rehypeTableScroll)

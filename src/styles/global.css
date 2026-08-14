@@ -1,6 +1,7 @@
 @layer theme, base, components, utilities;
 
 @import 'tailwindcss';
+@import 'katex/dist/katex.min.css';
 @import './redefine/base/variables.css';
 @import './redefine/base/global.css';
 @import './redefine/base/animations.css';
@@ -162,6 +163,18 @@
 
 	.markdown-body iframe {
 		width: 100%;
+	}
+
+	/* KaTeX 公式 */
+	.markdown-body .katex-display {
+		margin: 1.25rem 0;
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 0.5rem 0;
+	}
+
+	.dark .markdown-body .katex {
+		color: var(--rd-gray-1000);
 	}
 
 	/* Bilibili embed */
