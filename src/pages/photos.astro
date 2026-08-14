@@ -4,8 +4,21 @@ import PageTitle from '../components/PageTitle.astro';
 import { __ } from '../i18n';
 import masonryData from '../data/masonry.json';
 
+interface MasonryItem {
+	image?: string;
+	url?: string;
+	src?: string;
+	title?: string;
+	description?: string;
+	width?: number;
+	height?: number;
+	exif?: boolean;
+}
+
+const photos = masonryData as MasonryItem[];
+
 const title = __('photos');
-const hasExif = masonryData.some((entry) => entry && typeof entry === 'object' && entry.exif === true);
+const hasExif = photos.some((entry) => entry.exif === true);
 ---
 
 <BaseLayout title={title}>

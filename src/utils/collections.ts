@@ -42,10 +42,11 @@ export function getTags(posts: Post[]): TagInfo[] {
 	posts.forEach((post) => {
 		const tags = normalizeList(post.data.tags ?? post.data.tag);
 		tags.forEach((tag) => {
-			if (!map.has(tag)) {
-				map.set(tag, { name: tag, slug: tag.toLowerCase(), count: 0, posts: [] });
+			const slug = tag.toLowerCase();
+			if (!map.has(slug)) {
+				map.set(slug, { name: tag, slug, count: 0, posts: [] });
 			}
-			const info = map.get(tag)!;
+			const info = map.get(slug)!;
 			info.count += 1;
 			info.posts.push(post);
 		});
@@ -137,6 +138,7 @@ export function stripMarkdown(markdown: string): string {
 		.replace(/`[^`]*`/g, ' ')
 		.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
 		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+		.replace(/\{%[\s\S]*?%\}/g, ' ')
 		.replace(/^#{1,6}\s+/gm, '')
 		.replace(/^>\s?/gm, '')
 		.replace(/^\s*[-*+]\s+/gm, '')

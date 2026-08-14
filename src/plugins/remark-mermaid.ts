@@ -9,6 +9,7 @@ type Node = {
 	type: string;
 	lang?: string | null;
 	value?: string;
+	children?: Node[];
 	[prop: string]: unknown;
 };
 

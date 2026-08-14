@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "check": "astro check",
     "compress-images": "node scripts/compress-images.mjs"
   },
   "dependencies": {
@@ -26,5 +27,9 @@
     "sharp": "^0.35.0",
     "tailwindcss": "^4.3.3",
     "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3"
   }
 }

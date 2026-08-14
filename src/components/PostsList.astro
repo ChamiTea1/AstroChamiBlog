@@ -8,9 +8,7 @@ interface Props {
 
 const { posts } = Astro.props;
 
-const postYearList: { year: number; postList: Post[] }[] = [];
-posts.forEach((post) => postYearList.push(post.data.pubDate.getFullYear()));
-const years = [...new Set(postYearList)].sort((a, b) => b - a);
+const years = [...new Set(posts.map((post) => post.data.pubDate.getFullYear()))].sort((a, b) => b - a);
 const byYear = years.map((year) => ({
 	year,
 	postList: posts

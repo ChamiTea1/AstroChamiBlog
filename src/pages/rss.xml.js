@@ -1,6 +1,7 @@
 import { getCollection } from 'astro:content';
 import rss from '@astrojs/rss';
 import { siteConfig } from '../config';
+import { stripMarkdown } from '../utils/collections';
 
 export async function GET(context) {
 	const posts = await getCollection('blog');
@@ -11,6 +12,9 @@ export async function GET(context) {
 		items: posts.map((post) => ({
 			...post.data,
 			link: `/blog/${post.id}/`,
+			description: post.data.description ?? stripMarkdown(post.body ?? '').slice(0, 200),
+			content: post.rendered?.html ?? `<p>${stripMarkdown(post.body ?? '')}</p>`,
+			pubDate: post.data.pubDate,
 		})),
 	});
 }

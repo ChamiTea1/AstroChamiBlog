@@ -5,6 +5,22 @@ import { themeConfig } from '../config';
 import { __ } from '../i18n';
 import friendsData from '../data/friends.json';
 
+interface FriendItem {
+	name: string;
+	link: string;
+	description: string;
+	avatar?: string;
+	thumbnail?: string;
+}
+
+interface FriendsCategory {
+	links_category: string;
+	has_thumbnail?: boolean;
+	list: FriendItem[];
+}
+
+const friends = friendsData as FriendsCategory[];
+
 const title = __('friends');
 const friendsColumn = themeConfig.page_templates.friends_column;
 ---
@@ -14,7 +30,7 @@ const friendsColumn = themeConfig.page_templates.friends_column;
 		<div class="flex flex-col">
 			<PageTitle title={title} />
 			{
-				friendsData.map((category) => (
+				friends.map((category) => (
 					<>
 						<div class="mt-2 mb-4">
 							<h2 class="text-2xl font-bold">{category.links_category}</h2>

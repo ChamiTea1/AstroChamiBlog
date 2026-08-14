@@ -14,7 +14,12 @@ const sizeCache = new Map<string, ImageSize | null>();
 /** Resolves a /images/... src to a local file and reads its dimensions. */
 export async function getLocalImageSize(src: string): Promise<ImageSize | null> {
 	if (!src.startsWith('/images/')) return null;
-	const relative = decodeURIComponent(src.slice('/images/'.length)).replace(/\\/g, '/');
+	let relative: string;
+	try {
+		relative = decodeURIComponent(src.slice('/images/'.length)).replace(/\\/g, '/');
+	} catch {
+		return null;
+	}
 	if (!relative || relative.includes('..') || relative.startsWith('/')) return null;
 
 	const filePath = path.join(process.cwd(), 'public', 'images', relative);

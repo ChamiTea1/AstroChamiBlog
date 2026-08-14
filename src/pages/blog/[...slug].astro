@@ -9,7 +9,7 @@ import Comments from '../../components/Comments.astro';
 import Recommendation from '../../components/Recommendation.astro';
 import PostPagination from '../../components/PostPagination.astro';
 import { siteConfig, themeConfig, getAuthorLabel } from '../../config';
-import { __ } from '../../i18n';
+import { __, i18n } from '../../i18n';
 import { sortPosts, getWordCount, normalizePostCover, type Post } from '../../utils/collections';
 
 export async function getStaticPaths() {
@@ -30,7 +30,7 @@ const prevPost = index > 0 ? sorted[index - 1] : null;
 const nextPost = index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : null;
 
 const cover = normalizePostCover(data);
-const showCover = cover && cover !== false;
+const showCover = cover !== false;
 const author = (typeof data.author === 'string' && data.author) || siteConfig.author;
 const avatarImage = typeof data.avatar === 'object' && 'src' in data.avatar ? data.avatar : undefined;
 const authorLabel = themeConfig.articles.author_label.enable === true ? getAuthorLabel(sorted.length) : '';
@@ -50,7 +50,7 @@ const description = data.description || data.og_description;
 const ogImage = typeof data.og_image === 'string' ? data.og_image : undefined;
 const showComments = themeConfig.comment.enable === true && data.comment !== false;
 const showExpires = Boolean(data.expires);
-const expiresLabel = __('expired', 'some');
+const expiresLabel = i18n.expired;
 const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 ---
 

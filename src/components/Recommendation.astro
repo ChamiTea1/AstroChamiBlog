@@ -11,10 +11,20 @@ const { post } = Astro.props;
 
 const cfg = themeConfig.articles.recommendation;
 
-const skip = cfg.skip_dirs.some((dir) => new RegExp(`^${dir}`, 'g').test(post.id));
-let recommendations: { id: string; title: string; image: string }[] = [];
+interface LibraryItem {
+	id: string;
+	title: string;
+	image: string;
+	tokens: string[];
+}
 
-if (!skip) {
+/** 构建时按进程缓存语料与 TF-IDF 向量，避免每篇文章页都全量重建。 */
+let libraryCache: LibraryItem[] | null = null;
+let vectorsCache: number[][] | null = null;
+
+async function getLibrary(): Promise<{ library: LibraryItem[]; vectors: number[][] }> {
+	if (libraryCache && vectorsCache) return { library: libraryCache, vectors: vectorsCache };
+
 	const allPosts = sortPosts(await getCollection('blog'));
 
 	const cleanData = (data: string): string => {
@@ -39,7 +49,7 @@ if (!skip) {
 		return tokens.filter((token) => token.trim());
 	};
 
-	const library = allPosts.map((p) => ({
+	libraryCache = allPosts.map((p) => ({
 		id: p.id,
 		title: p.data.title,
 		image: (() => {
@@ -51,21 +61,7 @@ if (!skip) {
 		tokens: tokenize(p.body ?? ''),
 	}));
 
-	const corpus = library.map((item) => item.tokens);
-	const cosineSimilarity = (vector1: number[], vector2: number[]): number => {
-		let numerator = 0;
-		let sqrt1 = 0;
-		let sqrt2 = 0;
-		if (vector1.length === vector2.length) {
-			for (let i = 0; i < vector1.length; i++) {
-				numerator += vector1[i] * vector2[i];
-				sqrt1 += vector1[i] * vector1[i];
-				sqrt2 += vector2[i] * vector2[i];
-			}
-		}
-		return numerator / (Math.sqrt(sqrt1) * Math.sqrt(sqrt2) || 1);
-	};
-
+	const corpus = libraryCache.map((item) => item.tokens);
 	const allWords = [...new Set(corpus.flat())];
 	const wordLibrary: Record<string, number> = {};
 	allWords.forEach((word) => {
@@ -89,12 +85,35 @@ if (!skip) {
 		}
 	});
 
-	const vectors = wordFrequencies.map((frequency) =>
+	vectorsCache = wordFrequencies.map((frequency) =>
 		Object.keys(wordLibrary).map((word) => {
 			const idf = Math.log(corpus.length / (documentCountLibrary[word] + 1));
 			return frequency[word] * idf;
 		}),
 	);
+
+	return { library: libraryCache, vectors: vectorsCache };
+}
+
+const cosineSimilarity = (vector1: number[], vector2: number[]): number => {
+	let numerator = 0;
+	let sqrt1 = 0;
+	let sqrt2 = 0;
+	if (vector1.length === vector2.length) {
+		for (let i = 0; i < vector1.length; i++) {
+			numerator += vector1[i] * vector2[i];
+			sqrt1 += vector1[i] * vector1[i];
+			sqrt2 += vector2[i] * vector2[i];
+		}
+	}
+	return numerator / (Math.sqrt(sqrt1) * Math.sqrt(sqrt2) || 1);
+};
+
+const skip = cfg.skip_dirs.some((dir) => new RegExp(`^${dir}`, 'g').test(post.id));
+let recommendations: { id: string; title: string; image: string }[] = [];
+
+if (!skip) {
+	const { library, vectors } = await getLibrary();
 
 	const currentIndex = library.findIndex((item) => item.id === post.id);
 	if (currentIndex !== -1) {

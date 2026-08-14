@@ -31,7 +31,8 @@ function applyTagTransformer() {
 	};
 }
 
-let miniRenderer: ReturnType<typeof unified> | null = null;
+// 使用 any 规避 unified 泛型与自定义 tree 类型的兼容问题
+let miniRenderer: any = null;
 
 function getMiniRenderer() {
 	if (!miniRenderer) {
@@ -56,7 +57,7 @@ export function renderMarkdownBody(nodes: Node[]): string {
 	return String(processor.stringify(hast as never)).trim();
 }
 
-let stringRenderer: ReturnType<typeof unified> | null = null;
+let stringRenderer: any = null;
 
 /** Renders a markdown string to HTML (no Shiki highlighting). */
 export function renderMarkdownString(markdown: string): string {
@@ -77,7 +78,7 @@ export function renderMarkdownString(markdown: string): string {
 	return String(file.value).trim();
 }
 
-let parseProcessor: ReturnType<typeof unified> | null = null;
+let parseProcessor: any = null;
 
 /** Parses a markdown string into mdast root children. */
 export function parseMarkdown(markdown: string): Node[] {

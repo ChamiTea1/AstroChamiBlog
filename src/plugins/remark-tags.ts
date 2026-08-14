@@ -340,7 +340,7 @@ function renderGrid(args: string[], body: Node[]): string {
 	}
 
 	if (!Number.isFinite(cols)) cols = 2;
-	cols = Math.max(2, Math.floor(cols));
+	cols = Math.min(6, Math.max(2, Math.floor(cols)));
 	if (!gap) gap = '16px';
 
 	const content = renderMarkdownBody(body).replace(/>[ \t]*\n[ \t]*</g, '><').trim();
@@ -537,7 +537,7 @@ function renderInlineTag(tagName: string, args: string[]): string {
 function nodeText(node: Node): string {
 	if (node.type === 'text' || node.type === 'html') return node.value || '';
 	if (node.type === 'break') return '\n';
-	if (node.type === 'image') return node.alt || '';
+	if (node.type === 'image') return String(node.alt ?? '');
 	if (node.children) {
 		return node.children.map(nodeText).join('');
 	}

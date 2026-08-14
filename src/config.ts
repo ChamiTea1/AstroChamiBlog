@@ -162,7 +162,7 @@ export const themeConfig = {
 			{ label: 'Tags', path: '/tags', icon: 'fa-regular fa-tags' },
 			{ label: 'Categories', path: '/categories', icon: 'fa-regular fa-folder' },
 			{ label: 'About', path: '/about', icon: 'fa-regular fa-user' },
-		],
+		] as { label: string; path: string; icon?: string; submenus?: { label: string; path: string }[] }[],
 		search: {
 			enable: false,
 			preload: true,
@@ -280,6 +280,8 @@ export const themeConfig = {
 				meta: [] as string[],
 			},
 			gitalk: {
+				// 注意：Gitalk 的 clientSecret 会注入前端脚本（其 OAuth 流程使然，与原主题一致）。
+				// 介意明文暴露的话请改用 giscus/waline 等不需要 secret 的评论系统。
 				clientID: '',
 				clientSecret: '',
 				repo: '',
@@ -322,7 +324,8 @@ export const themeConfig = {
 	footer: {
 		runtime: true,
 		icon: '<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>',
-		start: '2026/8/10 00:00:00',
+		// 使用 ISO 格式，避免不同浏览器日期解析差异
+		start: '2026-08-10T00:00:00',
 		statistics: true,
 		customize: '',
 		icp: {
@@ -370,6 +373,13 @@ export const themeConfig = {
 
 	page_templates: {
 		tags_style: 'blur' as 'blur' | 'cloud',
+		// 友链页卡片列数（2 或 3）
+		friends_column: 2 as 2 | 3,
+		// 相册瀑布流分批加载
+		masonry: {
+			batch_size: 12,
+			initial_batch_size: 24,
+		},
 	},
 
 	credit: {

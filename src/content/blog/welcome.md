@@ -17,7 +17,7 @@ description: 新博客开张啦，记录生活与学习的点点滴滴。
 - 更多内容敬请期待
 
 {% note info %}
-本站基于 [Hexo](https://hexo.io/) 搭建，使用了 [Redefine](https://redefine.ohevan.com/) 主题。
+本站基于 [Astro](https://astro.build/) 搭建，主题移植自 [Redefine](https://github.com/EvanNotFound/hexo-theme-redefine)。
 {% endnote %}
 
 ## 如何开始
@@ -26,7 +26,7 @@ description: 新博客开张啦，记录生活与学习的点点滴滴。
 
 <!-- tab 留言板 -->
 
-欢迎去 [留言板](/comments/) 给我留言~
+欢迎在文章下方评论区给我留言~
 
 <!-- tab 友链 -->
 

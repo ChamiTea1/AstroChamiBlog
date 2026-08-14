@@ -29,8 +29,8 @@ const hasTypedSubtitle = themeConfig.home_banner.enable && (subtitleEntries.leng
 
 const attrs = themeStyleAttrs();
 const clientConfig = JSON.stringify(clientThemeConfig()).replace(/</g, '\\u003c');
-const langAgo = JSON.stringify(i18n.ago);
-const i18nJson = JSON.stringify(i18n);
+const langAgo = JSON.stringify(i18n.ago).replace(/</g, '\\u003c');
+const i18nJson = JSON.stringify(i18n).replace(/</g, '\\u003c');
 
 const preloaderEnabled = themeConfig.global.preloader.enable === true;
 const preloaderMessage = themeConfig.global.preloader.custom_message || siteConfig.title;
@@ -156,7 +156,6 @@ const injectFooter = (themeConfig.inject.enable ? themeConfig.inject.footer : []
 				}
 			/>
 		)}
-		<script defer src="/scripts/moment-with-locales.min.js"></script>
 	</head>
 	<body>
 		{themeConfig.global.scroll_progress.bar && (

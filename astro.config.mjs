@@ -12,6 +12,20 @@ import { rehypeImageSize } from './src/plugins/rehype-image-size';
 import { remarkRedefineTags } from './src/plugins/remark-tags';
 import { remarkMermaid } from './src/plugins/remark-mermaid';
 
+// 插件使用自定义 tree 类型，与 unified 的严格类型不兼容，统一放宽
+/** @type {any} */
+const remarkPlugins = [remarkRedefineTags, remarkMermaid];
+/** @type {any} */
+const rehypePlugins = [
+	rehypeCodeContainers,
+	rehypeExternalLinks,
+	rehypeDeleteMask,
+	rehypeTableScroll,
+	rehypeLazyload,
+	rehypeImageCaption,
+	rehypeImageSize,
+];
+
 // https://astro.build/config
 export default defineConfig({
 	site: siteConfig.url,
@@ -21,13 +35,14 @@ export default defineConfig({
 	},
 	markdown: {
 		processor: unified({
-			remarkPlugins: [remarkRedefineTags, remarkMermaid],
-			rehypePlugins: [rehypeCodeContainers, rehypeExternalLinks, rehypeDeleteMask, rehypeTableScroll, rehypeLazyload, rehypeImageCaption, rehypeImageSize],
+			remarkPlugins,
+			rehypePlugins,
 		}),
 		shikiConfig: {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			themes: {
-				light: markdownConfig.codeThemes.light,
-				dark: markdownConfig.codeThemes.dark,
+				light: /** @type {any} */ (markdownConfig.codeThemes.light),
+				dark: /** @type {any} */ (markdownConfig.codeThemes.dark),
 			},
 			wrap: true,
 		},

@@ -763,10 +763,25 @@
 			});
 	}
 
+	/* Shared scroll lock (search dialog + image viewer may overlap). */
+	let scrollLockCount = 0;
+	function lockScroll() {
+		if (scrollLockCount === 0) {
+			document.body.style.overflow = 'hidden';
+		}
+		scrollLockCount += 1;
+	}
+	function unlockScroll() {
+		scrollLockCount = Math.max(0, scrollLockCount - 1);
+		if (scrollLockCount === 0) {
+			document.body.style.overflow = '';
+		}
+	}
+
 	function closeSearchPopup() {
 		const dialog = $('#local-search');
 		if (!dialog) return;
-		document.body.style.overflow = '';
+		if (dialog.open) unlockScroll();
 		if (dialog.open) dialog.close();
 	}
 
@@ -774,8 +789,10 @@
 		const dialog = $('#local-search');
 		const input = $('#local-search-input');
 		if (!dialog || !input) return;
-		document.body.style.overflow = 'hidden';
-		if (!dialog.open) dialog.showModal();
+		if (!dialog.open) {
+			dialog.showModal();
+			lockScroll();
+		}
 		setTimeout(() => input.focus(), 300);
 		if (!isFetched) fetchSearchData();
 	}
@@ -1038,9 +1055,13 @@
 
 	const showViewerHandle = (isShow) => {
 		if (!viewerState.maskDom) return;
-		document.body.style.overflow = isShow ? 'hidden' : '';
-		if (isShow && !viewerState.maskDom.open) viewerState.maskDom.showModal();
-		else if (!isShow && viewerState.maskDom.open) viewerState.maskDom.close();
+		if (isShow && !viewerState.maskDom.open) {
+			viewerState.maskDom.showModal();
+			lockScroll();
+		} else if (!isShow && viewerState.maskDom.open) {
+			viewerState.maskDom.close();
+			unlockScroll();
+		}
 	};
 
 	const resetExifUI = () => {
@@ -1510,7 +1531,7 @@
 		container.hidden = true;
 		if (expiredDate < now) {
 			container.hidden = false;
-			value.innerHTML = value.innerHTML.replace('some', daysAgo);
+			value.innerHTML = value.innerHTML.replace('%s', daysAgo);
 		}
 	}
 

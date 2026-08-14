@@ -13,7 +13,7 @@ const { post, wordCount, minutes } = Astro.props;
 const { data } = post;
 
 const articleDateFormat = 'YYYY-MM-DD HH:mm:ss';
-const formatArticleDate = (value: Date) => formatDate(value, articleDateFormat).replace(' 00:00:00', '').replace(':00', '');
+const formatArticleDate = (value: Date) => formatDate(value, articleDateFormat).replace(' 00:00:00', '').replace(/:00$/, '');
 
 const categories = Array.isArray(data.categories) ? data.categories : data.categories ? [data.categories] : [];
 const tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
