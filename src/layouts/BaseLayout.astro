@@ -94,7 +94,7 @@ const injectFooter = (themeConfig.inject.enable ? themeConfig.inject.footer : []
 			})();
 		</script>
 
-		<link rel="icon" type="image/svg+xml" href={themeConfig.defaults.favicon} />
+		<link rel="icon" href={themeConfig.defaults.favicon} />
 		<link rel="apple-touch-icon" sizes="180x180" href={themeConfig.defaults.favicon} />
 		<meta name="theme-color" content={themeConfig.colors.primary} />
 		{themeConfig.global.open_graph.enable && <meta property="og:title" content={pageTitle} />}

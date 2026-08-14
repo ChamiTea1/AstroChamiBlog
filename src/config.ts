@@ -26,7 +26,7 @@ export const themeConfig = {
 	},
 
 	defaults: {
-		favicon: '/images/redefine-favicon.svg',
+		favicon: 'https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/avatar/shaoye.jpg',
 		logo: '',
 		avatar: 'https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/avatar/shaoye.jpg',
 	},
