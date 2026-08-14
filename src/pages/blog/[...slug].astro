@@ -9,6 +9,7 @@ import PostPagination from '../../components/PostPagination.astro';
 import { siteConfig, themeConfig, getAuthorLabel } from '../../config';
 import { __, i18n, formatDate } from '../../i18n';
 import { sortPosts, getWordCount, normalizePostCover, type Post } from '../../utils/collections';
+import { getLocalImageSize } from '../../plugins/rehype-image-size';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
@@ -29,6 +30,8 @@ const nextPost = index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : n
 
 const cover = normalizePostCover(data);
 const showCover = cover !== false;
+const coverDims = typeof cover === 'string' ? await getLocalImageSize(cover) : null;
+const coverIsPortrait = Boolean(coverDims && coverDims.height > coverDims.width);
 const author = (typeof data.author === 'string' && data.author) || siteConfig.author;
 
 const authorLabel = themeConfig.articles.author_label.enable === true ? getAuthorLabel(sorted.length) : '';
@@ -98,7 +101,16 @@ const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 					showCover && (
 						<header class="relative w-full overflow-hidden rounded-none sm:rounded-t-[calc(1rem-1px)]">
 							{typeof cover === 'string' ? (
-								<img src={cover} alt={data.title} class="h-60 w-full object-cover dark:brightness-75 sm:h-72 md:h-80" />
+								<img
+									src={cover}
+									alt={data.title}
+									class:list={[
+										'w-full dark:brightness-75',
+										coverIsPortrait
+											? 'h-72 object-contain object-top sm:h-96 md:h-[26rem]'
+											: 'h-60 object-cover sm:h-72 md:h-80',
+									]}
+								/>
 							) : (
 								<Image src={cover} alt={data.title} class="h-60 w-full object-cover dark:brightness-75 sm:h-72 md:h-80" />
 							)}
