@@ -467,6 +467,7 @@
 	function activateTOCLink(index) {
 		const container = $('#article-toc');
 		if (!container) return;
+		const scrollArea = container.querySelector('.toc-content') ?? container;
 		const navLinks = container.querySelectorAll('a.nav-link');
 		const navItems = container.querySelectorAll('.nav-item');
 		const target = navLinks[index];
@@ -481,29 +482,24 @@
 			activeItem = activeItem.parentElement?.closest('.nav-item');
 		}
 
-		const tocTop = container.getBoundingClientRect().top;
+		const tocTop = scrollArea.getBoundingClientRect().top;
 		const scrollTopOffset =
-			container.offsetHeight > window.innerHeight
-				? (container.offsetHeight - window.innerHeight) / 2
+			scrollArea.offsetHeight > window.innerHeight
+				? (scrollArea.offsetHeight - window.innerHeight) / 2
 				: 0;
 		const targetTop = target.getBoundingClientRect().top - tocTop;
 		const viewportHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 		const distanceToCenter = targetTop - viewportHeight / 2 + target.offsetHeight / 2 - scrollTopOffset;
-		container.scrollTo({ top: container.scrollTop + distanceToCenter, behavior: 'smooth' });
+		scrollArea.scrollTo({ top: scrollArea.scrollTop + distanceToCenter, behavior: 'smooth' });
 	}
 
 	function applyTocState(isOpen) {
-		const layout = $('#article-layout');
-		const mainContent = $('#main-content');
+		const card = $('#article-toc');
 		const toggle = $('#toc-toggle');
-		const icon = toggle?.querySelector('i');
-		if (icon) {
-			icon.classList.toggle('fas', isOpen);
-			icon.classList.toggle('fa-indent', isOpen);
-			icon.classList.toggle('fa-outdent', !isOpen);
+		if (card) {
+			card.dataset.state = isOpen ? 'open' : 'closed';
+			card.setAttribute('aria-expanded', String(isOpen));
 		}
-		if (layout) layout.dataset.tocState = isOpen ? 'open' : 'closed';
-		if (mainContent) mainContent.dataset.tocState = isOpen ? 'open' : 'closed';
 		if (toggle) {
 			toggle.hidden = false;
 			toggle.setAttribute('aria-expanded', String(isOpen));
@@ -531,13 +527,10 @@
 		updateActiveTOCLink();
 
 		const stored = getStyleStatus();
-		const initOpen = theme.articles.toc?.init_open;
 		if (stored && typeof stored.isOpenPageAside === 'boolean') {
 			applyTocState(stored.isOpenPageAside);
-		} else if (initOpen !== undefined) {
-			applyTocState(Boolean(initOpen));
 		} else {
-			applyTocState(true);
+			applyTocState(false);
 		}
 	}
 
@@ -546,9 +539,9 @@
 		if (tocToggleInitialized) return;
 		tocToggleInitialized = true;
 		$('#toc-toggle')?.addEventListener('click', () => {
-			const layout = $('#article-layout');
-			if (!layout) return;
-			const isOpen = layout.dataset.tocState !== 'open';
+			const card = $('#article-toc');
+			if (!card) return;
+			const isOpen = card.dataset.state !== 'open';
 			updateStyleStatus({ isOpenPageAside: isOpen });
 			applyTocState(isOpen);
 		});

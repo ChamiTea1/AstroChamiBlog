@@ -101,7 +101,7 @@ export const themeConfig = {
 			light: '/images/wallhaven-wqery6-light.webp',
 			dark: '/images/wallhaven-wqery6-dark.webp',
 		},
-		title: "当灵魂坠入无边黑暗，总有人携光而来拯救之",
+		title: "坠入无边黑暗，携光而来拯救之",
 		subtitle: {
 			text: ['云销雨霁，彩彻区明', 
 				   '萍水相逢，尽是他乡之客', 

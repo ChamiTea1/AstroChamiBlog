@@ -1,6 +1,5 @@
 ---
 import { themeConfig } from '../config';
-import { __ } from '../i18n';
 import TocItem, { type TocNode } from './TocItem.astro';
 
 export interface TocHeading {
@@ -52,16 +51,12 @@ if (useNumber) {
 }
 ---
 
-<div class="box-border w-full">
-	<div class="mb-1 text-xs font-medium text-rd-gray-1000">{__('toc')}</div>
-	<div class="mb-2.5 text-lg leading-normal font-bold whitespace-normal text-rd-gray-1000">{title}</div>
-	{
-		tree.length > 0 && (
-			<ol class="nav">
-				{tree.map((node) => (
-					<TocItem node={node} />
-				))}
-			</ol>
-		)
-	}
-</div>
+{
+	tree.length > 0 && (
+		<ol class="nav">
+			{tree.map((node) => (
+				<TocItem node={node} />
+			))}
+		</ol>
+	)
+}

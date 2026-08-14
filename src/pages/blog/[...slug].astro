@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Copyright from '../../components/Copyright.astro';
-import Toc from '../../components/Toc.astro';
+import PostAside from '../../components/PostAside.astro';
 import Comments from '../../components/Comments.astro';
 import Recommendation from '../../components/Recommendation.astro';
 import PostPagination from '../../components/PostPagination.astro';
@@ -58,13 +58,11 @@ const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 <BaseLayout title={data.title} description={description} image={ogImage}>
 	<div
 		id="main-content"
-		data-toc-state="closed"
-		class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out data-[toc-state=open]:!max-w-content-with-toc sm:w-6/7 md:w-4/5"
+		class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5 min-[1200px]:w-auto min-[1200px]:max-w-content-with-toc"
 	>
 		<div
 			id="article-layout"
-			class="article-layout relative flex h-full w-full box-border justify-between overflow-x-hidden sm:overflow-x-visible"
-			data-toc-state="closed"
+			class="article-layout relative flex h-full w-full box-border justify-between overflow-x-hidden sm:overflow-x-visible min-[1200px]:gap-6"
 		>
 			<article
 				class="article box-border mb-4 max-w-screen rounded-none border-0 bg-rd-background-100 px-1 py-5 shadow-none transition-[width] duration-200 ease-in-out sm:mb-8 sm:max-w-none sm:rounded-2xl sm:border sm:border-rd-gray-alpha-400 sm:p-0 sm:shadow-rd"
@@ -205,18 +203,7 @@ const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 				}
 			</article>
 
-			{
-				tocEnabled && (
-					<aside
-						id="article-toc"
-						class="toc sticky top-[calc(var(--current-navbar-height)+2.5rem)] float-right h-auto max-h-[calc(100vh-210px)] overflow-x-hidden overflow-y-auto p-2.5 whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none]"
-						data-expand={themeConfig.articles.toc.expand ? 'true' : 'false'}
-						aria-label={__('toc')}
-					>
-						<Toc headings={headings} title={data.title} />
-					</aside>
-				)
-			}
+			{tocEnabled && <PostAside headings={headings} title={data.title} author={author} />}
 		</div>
 	</div>
 
@@ -224,9 +211,9 @@ const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 		tocEnabled && (
 			<aside
 				slot="after-shell"
-				class="fixed top-[calc(var(--current-navbar-height)+2.5rem)] right-10 z-30 hidden transition-[top] duration-200 ease-in-out sm:block"
+				class="fixed right-4 bottom-28 z-30 transition-[top] duration-200 ease-in-out sm:right-6 min-[1200px]:hidden"
 			>
-				<div>
+				<div class="flex flex-col items-end gap-1">
 					<button
 						id="toc-toggle"
 						type="button"
@@ -235,9 +222,9 @@ const updatedIso = (data.updatedDate ?? data.pubDate).toISOString();
 						aria-expanded="false"
 						aria-label={__('toc')}
 						title={__('toc')}
-						class:list={['hidden', toolClass, 'lg:!flex']}
+						class:list={['flex', toolClass]}
 					>
-						<i class="fa-regular fa-outdent" aria-hidden="true"></i>
+						<i class="fa-regular fa-bars" aria-hidden="true"></i>
 					</button>
 					{
 						showComments && (

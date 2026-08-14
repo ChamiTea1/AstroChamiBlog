@@ -1,0 +1,50 @@
+---
+import { siteConfig, themeConfig } from '../config';
+import { __ } from '../i18n';
+import Toc, { type TocHeading } from './Toc.astro';
+
+interface Props {
+	headings: TocHeading[];
+	title: string;
+	author: string;
+}
+
+const { headings, title, author } = Astro.props;
+---
+
+<aside class="post-aside max-[1199px]:contents min-[1200px]:flex min-[1200px]:w-[300px] min-[1200px]:shrink-0 min-[1200px]:flex-col">
+	{/* 作者卡片 */}
+	<div class="hidden min-[1200px]:block rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 p-5 shadow-rd">
+		<div class="flex items-center gap-3">
+			<img
+				src={themeConfig.defaults.avatar}
+				alt={author}
+				class="size-12 shrink-0 rounded-full border border-rd-gray-alpha-400 object-cover"
+			/>
+			<div class="min-w-0">
+				<div class="truncate text-lg font-bold text-rd-gray-1000">{author}</div>
+				<div class="truncate text-xs text-rd-gray-900">{siteConfig.subtitle}</div>
+			</div>
+		</div>
+	</div>
+
+	{/* 目录卡片：桌面 sticky 于右侧栏，移动端变右下角浮窗 */}
+	<div
+		id="article-toc"
+		data-state="closed"
+		class:list={[
+			'toc-card box-border overflow-hidden rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 shadow-rd',
+			'max-[1199px]:fixed max-[1199px]:right-4 max-[1199px]:bottom-28 max-[1199px]:z-40 max-[1199px]:w-[280px] max-[1199px]:scale-0 max-[1199px]:origin-bottom-right max-[1199px]:transition-[scale] max-[1199px]:duration-300 max-[1199px]:data-[state=open]:scale-100',
+			'min-[1200px]:sticky min-[1200px]:top-[calc(var(--current-navbar-height)+1.5rem)] min-[1200px]:mt-5',
+		]}
+		aria-label={__('toc')}
+	>
+		<div class="flex items-center gap-1.5 border-b border-rd-gray-alpha-400 px-5 py-3.5">
+			<i class="fa-regular fa-bars text-rd-gray-900" aria-hidden="true"></i>
+			<span class="text-sm font-bold text-rd-gray-1000">{__('toc')}</span>
+		</div>
+		<div class="toc-content max-h-[calc(100vh-160px)] overflow-y-auto px-5 py-3 [scrollbar-width:none] [-ms-overflow-style:none]">
+			<Toc headings={headings} title={title} />
+		</div>
+	</div>
+</aside>
