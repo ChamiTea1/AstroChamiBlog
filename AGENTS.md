@@ -30,6 +30,11 @@ astro dev --background
 - 正文（markdown）图片必须使用 `/images/...` 绝对路径，相对路径不会被打包。
 - 图床链接优先使用 jsDelivr 加速：`https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/xxx.jpg`。
 - 文章封面建议横版 16:9、宽度 ≥ 1200px（卡片缩略图和文章头图均为横向裁切）。
+- 封面设置（frontmatter）：
+  - `cover: '/images/<主题>/xxx.jpg'`——本地工程图或图床 URL 均可；
+  - `coverPosition: 'top' | 'left' | 'right'`——首页卡片封面位置，默认 `top`（封面在上、文字在下）；
+  - 左右排布时封面绝对定位铺满卡片高度并裁切，卡片高度由文字决定（如 welcome 文章，封面用作者头像、`coverPosition: 'right'`）；
+  - 不写 `cover` 或 `coverPosition` 即无封面/默认上下排布。
 - 所有图片必须写 alt 文本（影响可访问性与 SEO，开启 `image_caption` 后自动显示为图注）。
 - 相册照片注意 EXIF 隐私：公开前剥离 GPS 定位信息；如需在图片查看器中展示拍摄参数，保留相机/光圈/快门等字段但删除 GPS。
 - 部署目标是 Cloudflare Pages：注意单部署 20000 文件、单文件 ≤ 25 MiB 的限制。
