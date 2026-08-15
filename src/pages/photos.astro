@@ -63,7 +63,7 @@ const title = __('photos');
 							<li>
 								<a
 									href={`/photos/${album.slug}/`}
-									class="group flex flex-col overflow-hidden rounded-2xl bg-rd-background-100 shadow-rd transition-shadow duration-300 hover:shadow-lg"
+									class="group flex flex-col"
 								>
 									{
 										(() => {
@@ -128,6 +128,7 @@ const title = __('photos');
 	}
 
 	.album-fan:hover img {
-		transform: translateX(calc(-50% + var(--fan-x))) rotate(calc(var(--fan-angle) * 1.4)) translateY(-6px);
+		transform: translateX(calc(-50% + var(--fan-x))) rotate(calc(var(--fan-angle) * 1.4)) translateY(-12px);
+		box-shadow: 0 16px 30px rgb(0 0 0 / 20%);
 	}
 </style>
