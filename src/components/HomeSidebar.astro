@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import { siteConfig, themeConfig, getAuthorLabel } from '../config';
+import { siteConfig, themeConfig } from '../config';
 import { __, formatDate } from '../i18n';
 import { getCategories, getTags, getWordCount, normalizePostCover, sortPosts } from '../utils/collections';
 
@@ -12,7 +12,6 @@ const siteWordCount = posts.reduce((sum, post) => sum + getWordCount(post.body ?
 const sidebar = themeConfig.home.sidebar;
 const announcement =
 	typeof sidebar.announcement === 'string' && sidebar.announcement.trim() ? sidebar.announcement : null;
-const authorLabel = themeConfig.articles.author_label.enable === true ? getAuthorLabel(posts.length) : '';
 const recentPosts = posts.slice(0, 5);
 
 const sidebarPosition = sidebar.position === 'right' ? 'order-last' : 'order-first';
@@ -47,11 +46,10 @@ const recentCover = (post: (typeof posts)[number]) => {
 			<img
 				src={themeConfig.defaults.avatar}
 				alt={siteConfig.author}
-				class="size-20 rounded-full border border-rd-gray-alpha-400 object-cover"
+				class="size-28 rounded-full border border-rd-gray-alpha-400 object-cover"
 			/>
-			<div class="mt-3 text-center text-xl font-bold text-rd-gray-1000">{siteConfig.author}</div>
-			<div class="mt-1 text-center text-xs text-rd-gray-900">{siteConfig.subtitle}</div>
-			{authorLabel && <div class="mt-1.5 rounded-sm border border-rd-gray-alpha-400 px-2 py-0.5 text-xs text-rd-gray-900">{authorLabel}</div>}
+			<div class="mt-3 text-center text-2xl font-bold text-rd-gray-1000">{siteConfig.author}</div>
+			<div class="mt-1.5 text-center text-sm text-rd-gray-900">{siteConfig.subtitle}</div>
 		</div>
 	</div>
 
