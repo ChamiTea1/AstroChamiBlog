@@ -43,7 +43,7 @@ const fanFor = (album: MasonryAlbum): FanImage[] => {
 	const images = (album.items ?? []).filter((item) => item.image);
 	if (images.length === 0) return [];
 	const count = Math.min(5, images.length);
-	const radius = 120;
+	const radius = 140; // 环太小会让牌挤成一团，放大半径让牌明显铺开
 	const fan: FanImage[] = [];
 	for (let i = 0; i < count; i++) {
 		const index = count === 1 ? 0 : Math.round((i * (images.length - 1)) / (count - 1));
@@ -56,7 +56,7 @@ const fanFor = (album: MasonryAlbum): FanImage[] => {
 			y: 8,
 			rot: t * 14,
 			cx: Math.round(radius * Math.cos(theta)),
-			cy: Math.round(radius * Math.sin(theta)) - 30,
+			cy: Math.round(radius * Math.sin(theta)),
 			wheelRot: (i * 360) / count,
 		});
 	}
