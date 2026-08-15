@@ -472,7 +472,7 @@
 			if (df === 'relative') {
 				el.innerHTML = getHowLongAgo(diff);
 			} else {
-				const finalDays = Math.floor(diff / (60 * 60 * 24 * 1000));
+				const finalDays = Math.floor(diff / (60 * 60 * 24));
 				if (finalDays < 7) {
 					el.innerHTML = getHowLongAgo(diff);
 				}
@@ -809,7 +809,6 @@
 	function closeSearchPopup() {
 		const dialog = $('#local-search');
 		if (!dialog) return;
-		if (dialog.open) unlockScroll();
 		if (dialog.open) dialog.close();
 	}
 
@@ -981,6 +980,14 @@
 	let searchInitialized = false;
 	function initLocalSearch() {
 		if (theme.navbar?.search?.enable !== true) return;
+		// The dialog element is replaced on every swup navigation; bind the scroll
+		// unlock to its native `close` event so Escape-cancel also unlocks (the
+		// browser closes <dialog> on Escape before keyup handlers run).
+		const searchDialog = $('#local-search');
+		if (searchDialog && !searchDialog.dataset.closeScrollBound) {
+			searchDialog.dataset.closeScrollBound = 'true';
+			searchDialog.addEventListener('close', () => unlockScroll());
+		}
 		if (!searchInitialized) {
 			searchInitialized = true;
 			document.addEventListener('input', (event) => {
@@ -1010,9 +1017,6 @@
 				if (event.target.closest('[data-search-action="close"]')) {
 					closeSearchPopup();
 				}
-			});
-			window.addEventListener('keyup', (event) => {
-				if (event.key === 'Escape') closeSearchPopup();
 			});
 		}
 		closeSearchPopup();
@@ -1705,7 +1709,7 @@
 		dateElements.forEach((element) => {
 			const rawDate = element.getAttribute('datetime') || element.getAttribute('data-date');
 			if (!rawDate) return;
-			const locale = 'zh-CN';
+			const locale = theme.language || 'zh-CN';
 			const formattedDate = moment(rawDate).locale(locale).calendar();
 			element.textContent = formattedDate;
 		});

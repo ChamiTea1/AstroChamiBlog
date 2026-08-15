@@ -1,10 +1,10 @@
 import { getCollection } from 'astro:content';
 import rss from '@astrojs/rss';
 import { siteConfig } from '../config';
-import { stripMarkdown } from '../utils/collections';
+import { sortPosts, stripMarkdown } from '../utils/collections';
 
 export async function GET(context) {
-	const posts = await getCollection('blog');
+	const posts = sortPosts(await getCollection('blog'));
 	return rss({
 		title: siteConfig.title,
 		description: siteConfig.subtitle,

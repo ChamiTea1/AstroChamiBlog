@@ -1,19 +1,6 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+// 占位桩页面已废弃：首页本身就是文章列表，此路径重定向回首页。
+return Astro.redirect('/', 301);
 ---
 
-<BaseLayout title="Blog">
-	<div id="main-content" class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5">
-		<section class="w-full py-12 text-center">
-			<h1 class="mb-4 text-4xl font-semibold text-rd-gray-1000">Blog</h1>
-			<p class="mb-6 text-2xl text-rd-gray-1000">All posts are listed on the home page.</p>
-			<a
-				href="/"
-				class="inline-flex items-center gap-2 rounded-lg border border-rd-gray-alpha-400 bg-rd-gray-100 px-4 py-3 text-rd-gray-1000 hover:bg-rd-gray-200 hover:text-primary"
-			>
-				<i class="fa-regular fa-house" aria-hidden="true"></i>
-				Blog index
-			</a>
-		</section>
-	</div>
-</BaseLayout>
+<></>

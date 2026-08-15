@@ -24,10 +24,7 @@
 @import './redefine/components/image-viewer.css';
 @import './redefine/components/preloader.css';
 @import './redefine/plugins/aplayer.css';
-@import './redefine/plugins/comments/waline.css';
-@import './redefine/plugins/comments/gitalk.css';
-@import './redefine/plugins/comments/twikoo.css';
-@import './redefine/plugins/comments/utterances.css';
+/* 评论系统样式改由 BaseLayout 按 comment.system 按需 <link> 加载 */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -77,7 +74,6 @@
 	--color-note-type-title-bg: var(--note-type-title-bg);
 	--color-note-black-title-bg: var(--note-black-title-bg);
 	--color-note-purple-title-bg: var(--note-purple-title-bg);
-	--color-home-banner-img: var(--home-banner-img);
 	--color-home-banner-text-color: var(--home-banner-text-color);
 	--shadow-rd: var(--rd-shadow);
 }

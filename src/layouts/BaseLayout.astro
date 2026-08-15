@@ -7,6 +7,10 @@ import Footer from '../components/Footer.astro';
 import SideTools from '../components/SideTools.astro';
 import SearchDialog from '../components/SearchDialog.astro';
 import ImageViewer from '../components/ImageViewer.astro';
+import walineCssUrl from '../styles/redefine/plugins/comments/waline.css?url';
+import gitalkCssUrl from '../styles/redefine/plugins/comments/gitalk.css?url';
+import twikooCssUrl from '../styles/redefine/plugins/comments/twikoo.css?url';
+import utterancesCssUrl from '../styles/redefine/plugins/comments/utterances.css?url';
 
 interface Props {
 	title?: string;
@@ -40,6 +44,8 @@ const mermaidEnabled = themeConfig.plugins.mermaid.enable === true;
 const aplayerEnabled = themeConfig.plugins.aplayer.enable === true;
 const gaEnabled = themeConfig.global.google_analytics.enable === true;
 const fonts = themeConfig.global.fonts;
+const commentSystem = themeConfig.comment.system;
+const commentEnabled = themeConfig.comment.enable === true;
 
 const injectHead = (themeConfig.inject.enable ? themeConfig.inject.head : []).map((item) =>
 	singlePage && item ? item.replace(/<script/gi, '<script data-swup-reload-script') : item || '',
@@ -105,6 +111,7 @@ const injectFooter = (themeConfig.inject.enable ? themeConfig.inject.footer : []
 		{themeConfig.global.open_graph.enable && <meta name="twitter:title" content={pageTitle} />}
 		{themeConfig.global.open_graph.enable && <meta name="twitter:description" content={ogDescription} />}
 		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="alternate" type="application/rss+xml" title={siteConfig.title} href="/rss.xml" />
 
 		<title>{pageTitle}</title>
 
@@ -126,6 +133,11 @@ const injectFooter = (themeConfig.inject.enable ? themeConfig.inject.footer : []
 		{themeConfig.articles.code_block.font.enable && themeConfig.articles.code_block.font.url && (
 			<link href={themeConfig.articles.code_block.font.url} rel="stylesheet" />
 		)}
+		{/* 评论系统样式按需加载（global.css 不再无条件全量引入四套） */}
+		{commentEnabled && commentSystem === 'waline' && <link rel="stylesheet" href={walineCssUrl} />}
+		{commentEnabled && commentSystem === 'gitalk' && <link rel="stylesheet" href={gitalkCssUrl} />}
+		{commentEnabled && commentSystem === 'twikoo' && <link rel="stylesheet" href={twikooCssUrl} />}
+		{commentEnabled && commentSystem === 'utterances' && <link rel="stylesheet" href={utterancesCssUrl} />}
 		{fonts.chinese.enable && fonts.chinese.url && <link href={fonts.chinese.url} rel="stylesheet" />}
 		{fonts.english.enable && fonts.english.url && <link href={fonts.english.url} rel="stylesheet" />}
 		{fonts.title.enable && fonts.title.url && <link href={fonts.title.url} rel="stylesheet" />}
@@ -216,6 +228,13 @@ const injectFooter = (themeConfig.inject.enable ? themeConfig.inject.footer : []
 							};
 
 							if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+								window.addEventListener('load', hidePreloader, { once: true });
+								return;
+							}
+
+							// anime.js 由 head 中 defer 加载，比本内联脚本晚执行；未就绪时退化为
+							// 加载完成后直接隐藏，避免 ReferenceError 卡死 preloader。
+							if (typeof anime === 'undefined') {
 								window.addEventListener('load', hidePreloader, { once: true });
 								return;
 							}

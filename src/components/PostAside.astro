@@ -45,6 +45,7 @@ const { headings, title, author, post, showToc = true } = Astro.props;
 				<div
 					id="article-toc"
 					data-state="closed"
+					data-expand={String(themeConfig.articles.toc.expand === false ? 'false' : 'true')}
 					class:list={[
 						'toc-card box-border overflow-hidden rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 shadow-rd',
 						'max-[1199px]:fixed max-[1199px]:right-4 max-[1199px]:bottom-28 max-[1199px]:z-40 max-[1199px]:w-[280px] max-[1199px]:scale-0 max-[1199px]:origin-bottom-right max-[1199px]:transition-[scale] max-[1199px]:duration-300 max-[1199px]:data-[state=open]:scale-100',
@@ -63,6 +64,6 @@ const { headings, title, author, post, showToc = true } = Astro.props;
 			)
 		}
 
-		<Recommendation post={post} />
+		{themeConfig.articles.recommendation.enable !== false && <Recommendation post={post} />}
 	</div>
 </aside>

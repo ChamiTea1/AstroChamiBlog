@@ -1,3 +1,34 @@
+## 项目概况
+
+Astro 7 + Tailwind CSS v4 的个人博客，移植自 [hexo-theme-redefine](https://github.com/EvanNotFound/hexo-theme-redefine)，站点语言为中文。
+
+- Node 版本要求 `>=22.12.0`（见 `package.json` engines 和 `.nvmrc`）。
+- 常用命令：
+  - `npm run dev` — 开发服务器（见下文"开发"节）
+  - `npm run build` — 构建到 `dist/`
+  - `npm run check` — astro check 类型检查，**改动代码后应跑一遍**
+  - `npm run preview` — 预览构建产物
+  - `npm run compress-images` — 压缩图片
+
+## 架构要点
+
+- **`src/config.ts` 是全站唯一配置中心**（对应原 hexo 主题的 `_config.yml`）。功能开关、导航、插件配置都改这里；CSS 主题变量由 `themeVars()` 运行时注入，不要在 CSS 里硬编码颜色值。
+- **`src/plugins/` 是自定义 remark/rehype 插件**（代码块容器、外链图标、图片懒加载/图注/宽高、hexo 标签插件、mermaid 等）。关键陷阱：`{% folding %}`/`{% grid %}`/`{% tabs %}` 等标签的正文走的是 `markdown-render.ts` 的 **mini 渲染管线**，现已与主管线功能对齐（图注、图片宽高、mermaid、Shiki 代码高亮、代码容器均有）——改插件时记得两条管线同步维护。
+- **`public/scripts/main.js` 是手工维护的客户端脚本**（不经过打包），交互逻辑（导航栏、TOC、搜索、懒加载、图片查看器等）都在这里，改前端行为找它。
+- 内容集合定义在 `src/content.config.ts`，文章在 `src/content/blog/`；`src/data/*.json`（essays/friends/bookmarks/masonry）是数据驱动页面。
+- i18n 文案在 `src/i18n.ts`（仅 en/zh），组件里用 `__()` 取值，新增 key 需两种语言都加（TS 会强制对齐）。
+
+## swup 单页模式注意事项
+
+`single_page: true`（当前配置）时，SwupScriptsPlugin 为 `optin: true` 模式：页面 slot 里通过 `<script src="...">` 引入的第三方脚本**必须加 `data-swup-reload-script` 属性**，否则前端路由切换进该页面时脚本不执行（参考 `src/components/Comments.astro` 的写法）。
+
+## 内容写作约定
+
+- 文章放 `src/content/blog/`，`pubDate` 用 ISO 格式带时区（如 `2026-08-13T17:30:00+08:00`），不要用空格分隔的非标准格式。
+- 支持的 hexo 风格标签插件：`{% note %}`、`{% folding %}`、`{% grid %}`、`{% tabs %}`、`{% btn %}`、`{% audio %}`、`{% bilibili %}` 等（实现见 `src/plugins/remark-tags.ts`）。
+  - 行内标签（btn/audio/bilibili）可与同段落的粗体、行内代码、链接共存（2026-08-15 已修复 GFM 自动链接拆散标签参数导致的格式丢失，见 `CODE_REVIEW.md` 问题 1 的修复记录）。
+- 已知问题清单见 `CODE_REVIEW.md`，改相关代码前先查一下，避免重复"发现"或误改。
+
 ## 开发
 
 启动开发服务器时，请使用后台模式：
@@ -38,3 +69,9 @@ astro dev --background
 - 所有图片必须写 alt 文本（影响可访问性与 SEO，开启 `image_caption` 后自动显示为图注）。
 - 相册照片注意 EXIF 隐私：公开前剥离 GPS 定位信息；如需在图片查看器中展示拍摄参数，保留相机/光圈/快门等字段但删除 GPS。
 - 部署目标是 Cloudflare Pages：注意单部署 20000 文件、单文件 ≤ 25 MiB 的限制。
+
+## 部署前检查清单
+
+- `src/config.ts` 的 `url` 改为真实域名（当前是占位符 `https://example.com`，会污染 RSS/sitemap/OG）。
+- 替换 `src/data/` 下的示例数据（essays/friends/bookmarks 目前是英文示例）。
+- 确认 favicon 指向（当前配置指向外部图床头像，`public/favicon.ico`/`favicon.svg` 未被引用）。

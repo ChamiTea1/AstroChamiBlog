@@ -8,9 +8,11 @@ import essaysData from '../data/essays.json';
 
 const title = __('essays');
 
-const essays = essaysData
-	.map((essay) => ({ ...essay, html: renderMarkdownString(essay.content) }))
-	.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+const essays = (
+	await Promise.all(
+		essaysData.map(async (essay) => ({ ...essay, html: await renderMarkdownString(essay.content) })),
+	)
+).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 ---
 
 <BaseLayout title={title}>
@@ -19,7 +21,8 @@ const essays = essaysData
 			<PageTitle title={title} />
 			<ul class="mb-4 flex flex-col gap-6">
 				{essays.map((essay) => {
-					const rawDate = new Date(`${essay.date.replace(' ', 'T')}Z`).toISOString().slice(0, 19).replace('T', ' ');
+					// essay.date 为无时区的本地时间，直接按本地解析，避免误按 UTC 造成 8 小时偏移。
+					const rawDate = new Date(essay.date.replace(' ', 'T')).toISOString().slice(0, 19).replace('T', ' ');
 					return (
 						<li class="relative flex w-full flex-row">
 							<div class="mr-4 size-10 shrink-0 overflow-hidden rounded-2xl border border-rd-gray-alpha-400 p-px">
@@ -39,5 +42,5 @@ const essays = essaysData
 		</div>
 	</div>
 
-	<script defer src="/scripts/moment-with-locales.min.js"></script>
+	<script defer src="/scripts/moment-with-locales.min.js" data-swup-reload-script></script>
 </BaseLayout>

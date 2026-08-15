@@ -33,6 +33,7 @@
     --scrollbar-color: #c1c1c1;
     --scrollbar-color-hover: #a1a1a1;
     --scroll-bar-bg-color: #fafafa;
+    --scroll-bar-bg-color-hover: #e6e6e6;
     --avatar-background-color: #06c;
     --note-blue-title-bg: #d6f7fb;
     --note-red-title-bg: #fde9e9;
@@ -59,6 +60,7 @@
     --scrollbar-color: #898989;
     --scrollbar-color-hover: #a1a1a1;
     --scroll-bar-bg-color: #2a2c30;
+    --scroll-bar-bg-color-hover: #3a3d42;
     --avatar-background-color: #005cb8;
     --note-blue-title-bg: #1e3e46;
     --note-red-title-bg: #4e1e1e;

@@ -199,7 +199,7 @@ function extractIcon(tokens: string[]): { iconClass: string; remainingTokens: st
 	return { iconClass, remainingTokens };
 }
 
-function renderCallout(args: string[], body: Node[]): string {
+async function renderCallout(args: string[], body: Node[]): Promise<string> {
 	const rawArgs = args.join(' ').trim();
 	const parsed = parseTagArgs(args);
 	const namedType = (parsed.named.type || '').trim();
@@ -243,7 +243,7 @@ function renderCallout(args: string[], body: Node[]): string {
 
 	const normalizedType = CALLOUT_VARIANTS.has(type) ? type : 'default';
 	const iconMarkup = iconClass ? `<i class="${escapeHtml(iconClass)} shrink-0 text-sm leading-none text-(--callout-primary-color)" aria-hidden="true"></i>` : '';
-	const content = renderMarkdownBody(body);
+	const content = await renderMarkdownBody(body);
 
 	if (variant === 'titled') {
 		return `<aside class="${cn('callout', extraClasses.join(' '), 'relative mb-4 flex flex-row gap-2 rounded-xl border border-rd-gray-alpha-400 bg-(--callout-bg-color) p-3 pl-1')}" data-kind="titled" data-variant="${normalizedType}" role="note">
@@ -268,7 +268,7 @@ function renderCallout(args: string[], body: Node[]): string {
 
 const FOLDING_VARIANTS = new Set(['default', 'yellow', 'blue', 'green', 'red', 'orange', 'pink', 'cyan', 'white', 'black', 'gray', 'purple']);
 
-function renderFolding(args: string[], body: Node[]): string {
+async function renderFolding(args: string[], body: Node[]): Promise<string> {
 	const rawArgs = args.join(' ').trim();
 	const parsed = parseTagArgs(args);
 	const hasNamed = ['title', 'class', 'classes', 'style', 'open'].some((k) => parsed.named[k] != null);
@@ -300,7 +300,7 @@ function renderFolding(args: string[], body: Node[]): string {
 	const variant = classNames.find((cls) => FOLDING_VARIANTS.has(cls)) || 'default';
 	const customClass = classNames.filter((cls) => !FOLDING_VARIANTS.has(cls)).join(' ');
 
-	let content = renderMarkdownBody(body);
+	let content = await renderMarkdownBody(body);
 	content = content.replace(/<(h[1-6])>/g, (_, tag) => `<p class="${tag}">`).replace(/<\/(h[1-6])>/g, () => '</p>');
 
 	return `<details class="folding group relative my-4 rounded-xl border border-rd-gray-alpha-400 bg-rd-gray-100 ${customClass}" data-variant="${variant}"${open ? ' open' : ''} data-header-exclude>
@@ -313,7 +313,7 @@ function renderFolding(args: string[], body: Node[]): string {
 /* Grid ({% grid %}, {% btns %}, {% buttons %})                  */
 /* ---------------------------------------------------------- */
 
-function renderGrid(args: string[], body: Node[]): string {
+async function renderGrid(args: string[], body: Node[]): Promise<string> {
 	const parsed = parseTagArgs(args);
 	const hasNamed = ['cols', 'columns', 'gap', 'class', 'classes'].some((k) => parsed.named[k] != null);
 
@@ -343,7 +343,7 @@ function renderGrid(args: string[], body: Node[]): string {
 	cols = Math.min(6, Math.max(2, Math.floor(cols)));
 	if (!gap) gap = '16px';
 
-	const content = renderMarkdownBody(body).replace(/>[ \t]*\n[ \t]*</g, '><').trim();
+	const content = (await renderMarkdownBody(body)).replace(/>[ \t]*\n[ \t]*</g, '><').trim();
 
 	return `<div class="${cn('grid my-4', classNames.join(' '))}" style="grid-template-columns: repeat(${cols}, minmax(0, 1fr)); gap: ${escapeHtml(gap)};">${content}</div>`;
 }
@@ -380,7 +380,7 @@ function splitTabBlocks(body: Node[]): { headerRaw: string; nodes: Node[]; index
 	return blocks;
 }
 
-function renderTabs(args: string[], body: Node[], tagName: string): string {
+async function renderTabs(args: string[], body: Node[], tagName: string): Promise<string> {
 	tabGroupSeed += 1;
 	const rawArgs = args.join(' ').trim();
 	const parsed = parseTagArgs(args);
@@ -417,17 +417,17 @@ function renderTabs(args: string[], body: Node[], tagName: string): string {
 
 	let tabNav = '';
 	let tabContent = '';
-	blocks.forEach((block) => {
+	for (const block of blocks) {
 		const [caption = '', icon = ''] = block.headerRaw.split('@').map((p) => p.trim());
 		const tabId = `${groupId}-tab-${block.index}`;
 		const panelId = `${groupId}-panel-${block.index}`;
-		const content = renderMarkdownBody(block.nodes);
+		const content = await renderMarkdownBody(block.nodes);
 		const active = block.index === resolvedActiveIndex;
 		const iconMarkup = icon ? `<i class="${escapeHtml(icon.includes('fa-') ? icon : `fa-solid fa-${icon}`)} mr-1" aria-hidden="true"></i>` : '';
 
 		tabNav += `<button id="${tabId}" type="button" role="tab" aria-controls="${panelId}" aria-selected="${active}" class="inline-flex items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-sm font-medium text-rd-gray-900 transition-colors hover:text-rd-gray-1000 aria-selected:border-primary aria-selected:text-primary" tabindex="${active ? '0' : '-1'}">${iconMarkup}${escapeHtml(caption)}</button>`;
 		tabContent += `<div id="${panelId}" role="tabpanel" aria-labelledby="${tabId}" class="markdown-body min-w-0"${active ? '' : ' hidden'}>${content}</div>`;
-	});
+	}
 
 	return `<div id="${groupId}" data-tabs class="tabs relative my-4 rounded-xl border border-rd-gray-alpha-400 bg-rd-gray-100 overflow-hidden"><div role="tablist" aria-orientation="horizontal" class="not-markdown scrollbar-hide flex gap-3.5 overflow-x-auto px-4">${tabNav}</div><div class="rounded-lg bg-rd-background-100/70 shadow-sm p-4">${tabContent}</div></div>`;
 }
@@ -436,7 +436,7 @@ function renderTabs(args: string[], body: Node[], tagName: string): string {
 /* Main plugin                                                  */
 /* ---------------------------------------------------------- */
 
-const BLOCK_TAGS: Record<string, (args: string[], body: Node[]) => string> = {
+const BLOCK_TAGS: Record<string, (args: string[], body: Node[]) => string | Promise<string>> = {
 	callout: renderCallout,
 	note: (args, body) => renderCallout(args, body),
 	notes: (args, body) => renderCallout(args, body),
@@ -536,11 +536,31 @@ function renderInlineTag(tagName: string, args: string[]): string {
 
 function nodeText(node: Node): string {
 	if (node.type === 'text' || node.type === 'html') return node.value || '';
+	if (node.type === 'inlineCode') return '`' + (node.value ?? '') + '`';
 	if (node.type === 'break') return '\n';
 	if (node.type === 'image') return String(node.alt ?? '');
 	if (node.children) {
 		return node.children.map(nodeText).join('');
 	}
+	return '';
+}
+
+/** Serializes an inline node back to its markdown source (preserves formatting markers). */
+function nodeToMarkdown(node: Node): string {
+	if (node.type === 'text' || node.type === 'html') return node.value || '';
+	if (node.type === 'inlineCode') return '`' + (node.value ?? '') + '`';
+	if (node.type === 'break') return '\n';
+	if (node.type === 'image') return '![' + String(node.alt ?? '') + '](' + String(node.url ?? '') + ')';
+	if (node.type === 'link') {
+		const text = (node.children ?? []).map(nodeToMarkdown).join('');
+		const url = String(node.url ?? '');
+		// GFM literal autolink: emit the bare URL so tag arguments stay intact.
+		return text === url ? url : '[' + text + '](' + url + ')';
+	}
+	if (node.type === 'emphasis') return '*' + (node.children ?? []).map(nodeToMarkdown).join('') + '*';
+	if (node.type === 'strong') return '**' + (node.children ?? []).map(nodeToMarkdown).join('') + '**';
+	if (node.type === 'delete') return '~~' + (node.children ?? []).map(nodeToMarkdown).join('') + '~~';
+	if (node.children) return node.children.map(nodeToMarkdown).join('');
 	return '';
 }
 
@@ -556,6 +576,8 @@ function processInlineTags(node: Node) {
 	const next: Node[] = [];
 	node.children.forEach((child) => {
 		if (child.type !== 'text' || !child.value || !child.value.includes('{%')) {
+			// Recurse into emphasis/link/etc. so tags inside bold or links still render.
+			if (child.children) processInlineTags(child);
 			next.push(child);
 			return;
 		}
@@ -579,7 +601,7 @@ function processInlineTags(node: Node) {
 	node.children = next;
 }
 
-const getBlockRenderer = (tagName: string): ((args: string[], body: Node[]) => string) | null => {
+const getBlockRenderer = (tagName: string): ((args: string[], body: Node[]) => string | Promise<string>) | null => {
 	if (tagName === 'tabs' || tagName === 'subtabs' || tagName === 'subsubtabs') {
 		return (a, b) => renderTabs(a, b, tagName);
 	}
@@ -587,7 +609,7 @@ const getBlockRenderer = (tagName: string): ((args: string[], body: Node[]) => s
 };
 
 /** Handles opening tag + body + end tag inside ONE paragraph, keeping inner mdast nodes intact. */
-function processSameParagraphTag(parent: Node, index: number, paragraph: Node): boolean {
+async function processSameParagraphTag(parent: Node, index: number, paragraph: Node): Promise<boolean> {
 	const children = paragraph.children ?? [];
 	const first = children[0];
 	const last = children[children.length - 1];
@@ -632,7 +654,7 @@ function processSameParagraphTag(parent: Node, index: number, paragraph: Node): 
 		bodyNodes.push({ type: 'text', value: tail });
 	}
 
-	parent.children![index] = { type: 'html', value: renderer(args, bodyNodes) };
+	parent.children![index] = { type: 'html', value: await renderer(args, bodyNodes) };
 	return true;
 }
 
@@ -705,20 +727,20 @@ function nestedDepthOffset(tagName: string, text: string): number {
 }
 
 /** Replaces a whole paragraph with rendered content when it is (or contains) tags. */
-function processTagParagraph(parent: Node, index: number, text: string): 'block' | 'inline' | 'none' {
+async function processTagParagraph(parent: Node, index: number, text: string): Promise<'block' | 'inline' | 'none'> {
 	const trimmed = text.trim();
 	const paragraph = parent.children![index];
 	const children = parent.children!;
 
 	// Case B: opening tag + body + end tag all inside one paragraph
-	if (processSameParagraphTag(parent, index, paragraph)) {
+	if (await processSameParagraphTag(parent, index, paragraph)) {
 		return 'block';
 	}
 
 	const argsFor = (rawArgs: string) => (rawArgs.trim() ? [rawArgs.trim()] : []);
-	const tryRenderBlock = (tagName: string, args: string[], bodyNodes: Node[]): string | null => {
+	const tryRenderBlock = async (tagName: string, args: string[], bodyNodes: Node[]): Promise<string | null> => {
 		const renderer = getBlockRenderer(tagName);
-		return renderer ? renderer(args, bodyNodes) : null;
+		return renderer ? await renderer(args, bodyNodes) : null;
 	};
 
 	// Case D: paragraph starts with an opening tag followed by content
@@ -734,7 +756,7 @@ function processTagParagraph(parent: Node, index: number, text: string): 'block'
 			// Temporarily account for nested opens inside the remainder paragraph.
 			const endIndex = scanBlockEnd(childrenForScan, index + 1, startMatch[1], bodyNodes, 1 + depthBump);
 			if (endIndex !== null) {
-				const html = tryRenderBlock(startMatch[1], argsFor(startMatch[2]), bodyNodes);
+				const html = await tryRenderBlock(startMatch[1], argsFor(startMatch[2]), bodyNodes);
 				if (html) {
 					children.splice(index, endIndex - index + 1, { type: 'html', value: html });
 					return 'block';
@@ -750,7 +772,7 @@ function processTagParagraph(parent: Node, index: number, text: string): 'block'
 		const bodyNodes: Node[] = [];
 		const endIndex = scanBlockEnd(children, index + 1, tagName, bodyNodes);
 		if (endIndex !== null) {
-			const html = tryRenderBlock(tagName, argsFor(openMatch[2]), bodyNodes);
+			const html = await tryRenderBlock(tagName, argsFor(openMatch[2]), bodyNodes);
 			if (html) {
 				children.splice(index, endIndex - index + 1, { type: 'html', value: html });
 				return 'block';
@@ -762,6 +784,48 @@ function processTagParagraph(parent: Node, index: number, text: string): 'block'
 	// Case C: inline tags inside the paragraph
 	INLINE_TAG_REGEX.lastIndex = 0;
 	if (INLINE_TAG_REGEX.test(text)) {
+		// When the paragraph contains structured inline nodes (emphasis, links,
+		// inline code, ...), flattening via paragraphText would destroy their
+		// Markdown markup. Replace tags inside text nodes only and keep the rest
+		// of the node tree intact.
+		const hasStructuredChildren = (paragraph.children ?? []).some(
+			(child) => child.type !== 'text' && child.type !== 'html',
+		);
+		if (hasStructuredChildren) {
+			// GFM 自动链接会把标签参数里的 URL 拆成独立 link 节点（例如
+			// {% audio https://... %}），此时标签跨多个节点、无法按文本节点
+			// 逐一匹配。检测到跨节点标签时回退到 flatten 渲染，保证内容不丢。
+			const hasSplitTag = (paragraph.children ?? []).some((child) => {
+				if (child.type !== 'text') return false;
+				const value = String(child.value ?? '');
+				const open = value.indexOf('{%');
+				return open !== -1 && !value.slice(open).includes('%}');
+			});
+			if (!hasSplitTag) {
+				processInlineTags(paragraph);
+				return 'inline';
+			}
+			// 标签跨节点（GFM 自动链接拆散了参数里的 URL）：把段落序列化回
+			// markdown 源码再渲染，保住周围的粗体/行内代码/链接等格式。
+			const reconstructed = (paragraph.children ?? []).map(nodeToMarkdown).join('');
+			const markdownSegments: string[] = [];
+			let markdownLastIndex = 0;
+			let markdownMatch: RegExpExecArray | null;
+			INLINE_TAG_REGEX.lastIndex = 0;
+			while ((markdownMatch = INLINE_TAG_REGEX.exec(reconstructed)) !== null) {
+				if (markdownMatch.index > markdownLastIndex) {
+					markdownSegments.push(reconstructed.slice(markdownLastIndex, markdownMatch.index));
+				}
+				markdownSegments.push(renderInlineTag(markdownMatch[1], [markdownMatch[2]]));
+				markdownLastIndex = INLINE_TAG_REGEX.lastIndex;
+			}
+			if (markdownLastIndex < reconstructed.length) {
+				markdownSegments.push(reconstructed.slice(markdownLastIndex));
+			}
+			const reconstructedHtml = await renderMarkdownString(markdownSegments.join(''));
+			parent.children![index] = { type: 'html', value: reconstructedHtml };
+			return 'inline';
+		}
 		const segments: string[] = [];
 		let lastIndex = 0;
 		let match: RegExpExecArray | null;
@@ -772,7 +836,7 @@ function processTagParagraph(parent: Node, index: number, text: string): 'block'
 			lastIndex = INLINE_TAG_REGEX.lastIndex;
 		}
 		if (lastIndex < text.length) segments.push(text.slice(lastIndex));
-		const rendered = renderMarkdownString(segments.join(''));
+		const rendered = await renderMarkdownString(segments.join(''));
 		parent.children![index] = { type: 'html', value: rendered };
 		return 'inline';
 	}
@@ -780,7 +844,7 @@ function processTagParagraph(parent: Node, index: number, text: string): 'block'
 }
 
 export function remarkRedefineTags() {
-	return (tree: Node) => {
+	return async (tree: Node) => {
 		const queue: Node[] = [tree];
 		while (queue.length > 0) {
 			const parent = queue.pop()!;
@@ -794,7 +858,7 @@ export function remarkRedefineTags() {
 
 				const text = paragraphText(child);
 				if (text !== null && text.includes('{%')) {
-					const result = processTagParagraph(parent, i, text);
+					const result = await processTagParagraph(parent, i, text);
 					if (result === 'block' || result === 'inline') {
 						continue;
 					}

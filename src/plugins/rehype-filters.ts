@@ -67,7 +67,12 @@ export function rehypeExternalLinks() {
 			} catch {
 				return;
 			}
-			if (!url.protocol || url.hostname === getSiteHostname()) return;
+			if (
+				!url.protocol ||
+				(url.protocol !== 'http:' && url.protocol !== 'https:') ||
+				url.hostname === getSiteHostname()
+			)
+				return;
 			node.properties = {
 				...node.properties,
 				dataExternalLink: '',

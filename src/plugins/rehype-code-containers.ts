@@ -14,22 +14,6 @@ type Node = {
 	[prop: string]: unknown;
 };
 
-const escapeAttr = (value: string) =>
-	value.replace(/[&<>"']/g, (char) => {
-		switch (char) {
-			case '&':
-				return '&amp;';
-			case '<':
-				return '&lt;';
-			case '>':
-				return '&gt;';
-			case '"':
-				return '&quot;';
-			default:
-				return '&#39;';
-		}
-	});
-
 function wrapCodeBlocks(tree: Node) {
 	const queue: Node[] = [tree];
 	while (queue.length > 0) {
@@ -64,7 +48,8 @@ function wrapCodeBlocks(tree: Node) {
 				const wrapper: Node = {
 					type: 'element',
 					tagName: 'div',
-					properties: { className: ['code-container'], dataRel: escapeAttr(label) },
+					// rehype-stringify escapes attribute values; pre-escaping here would double-escape.
+				properties: { className: ['code-container'], dataRel: label },
 					children: [node],
 				};
 				children[i] = wrapper;

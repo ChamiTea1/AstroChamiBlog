@@ -32,7 +32,13 @@ const rehypePlugins = [
 // https://astro.build/config
 export default defineConfig({
 	site: siteConfig.url,
-	integrations: [mdx(), sitemap()],
+	integrations: [
+		mdx(),
+		// /blog/ 是重定向占位页，不进 sitemap
+		sitemap({
+			filter: (page) => !page.endsWith('/blog/'),
+		}),
+	],
 	vite: {
 		plugins: [tailwindcss()],
 	},

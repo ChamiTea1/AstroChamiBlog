@@ -35,6 +35,6 @@ const hasExif = photos.some((entry) => entry.exif === true);
 		</div>
 	</div>
 
-	<script defer src="/scripts/minimasonry.min.js"></script>
-	{hasExif && <script defer src="/scripts/exif-reader.js"></script>}
+	<script defer src="/scripts/minimasonry.min.js" data-swup-reload-script></script>
+	{hasExif && <script defer src="/scripts/exif-reader.js" data-swup-reload-script></script>}
 </BaseLayout>

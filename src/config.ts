@@ -172,7 +172,7 @@ export const themeConfig = {
 			enable: true,
 			position: 'left' as 'left' | 'right',
 			first_item: 'menu' as 'menu' | 'info',
-			announcement: 'Welcome to my blog!',
+			announcement: '欢迎来到我的小站~',
 			show_on_mobile: true,
 			links: [
 				{ label: 'Archives', path: '/archives', icon: 'fa-regular fa-archive' },
@@ -251,7 +251,7 @@ export const themeConfig = {
 			enable: true,
 			title: '推荐阅读',
 			limit: 3,
-			mobile_limit: 2,
+			// 推荐阅读卡片在本移植版仅桌面端渲染，移动端不显示，故无 mobile_limit。
 			placeholder: '/images/wallhaven-wqery6-light.webp',
 			skip_dirs: [] as string[],
 		},
@@ -589,6 +589,7 @@ export function clientThemeConfig(): Record<string, unknown> {
 	const t = themeConfig;
 	return {
 		colors: t.colors,
+		language: siteConfig.language,
 		global: t.global,
 		home_banner: {
 			...t.home_banner,
