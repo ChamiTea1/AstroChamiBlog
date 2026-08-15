@@ -23,6 +23,32 @@ interface MasonryAlbum {
 
 const albums = (albumsData as unknown as MasonryAlbum[]).filter((album) => album.slug && album.name);
 
+interface FanImage {
+	image: string;
+	alt: string;
+	angle: number;
+	x: number;
+}
+
+/** 取相册最多 5 张图，按扇形展开（角度与水平位移均匀分布）。 */
+const fanFor = (album: MasonryAlbum): FanImage[] => {
+	const images = (album.items ?? []).filter((item) => item.image);
+	if (images.length === 0) return [];
+	const count = Math.min(5, images.length);
+	const fan: FanImage[] = [];
+	for (let i = 0; i < count; i++) {
+		const index = count === 1 ? 0 : Math.round((i * (images.length - 1)) / (count - 1));
+		const t = i - (count - 1) / 2;
+		fan.push({
+			image: images[index].image as string,
+			alt: images[index].title || album.name,
+			angle: t * 14,
+			x: t * 30,
+		});
+	}
+	return fan;
+};
+
 const title = __('photos');
 ---
 
@@ -39,15 +65,28 @@ const title = __('photos');
 									href={`/photos/${album.slug}/`}
 									class="group flex flex-col overflow-hidden rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 shadow-rd transition-colors duration-300 hover:border-primary/40"
 								>
-									<div class="aspect-[4/3] w-full overflow-hidden bg-rd-gray-100">
-										<img
-											src={album.cover}
-											alt={album.name}
-											class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-											loading="lazy"
-											decoding="async"
-										/>
-									</div>
+									{
+										(() => {
+											const fan = fanFor(album);
+											return fan.length > 0 ? (
+												<div class="album-fan flex justify-center" aria-hidden="true">
+													{fan.map((img, i) => (
+														<img
+															src={img.image}
+															alt={img.alt}
+															loading="lazy"
+															decoding="async"
+															style={`--fan-angle: ${img.angle}deg; --fan-x: ${img.x}px; z-index: ${i + 1};`}
+														/>
+													))}
+												</div>
+											) : (
+												<div class="flex aspect-[4/3] w-full items-center justify-center bg-rd-gray-100">
+													<i class="fa-regular fa-images text-3xl text-rd-gray-900" aria-hidden="true"></i>
+												</div>
+											);
+										})()
+									}
 									<div class="flex flex-col gap-1.5 p-4">
 										<div class="flex items-baseline justify-between gap-2">
 											<span class="truncate text-lg font-bold text-rd-gray-1000 transition-colors group-hover:!text-primary">{album.name}</span>
@@ -66,3 +105,32 @@ const title = __('photos');
 		</div>
 	</div>
 </BaseLayout>
+
+<style>
+	/* 子相册封面：多图扇形堆叠 */
+	.album-fan {
+		position: relative;
+		height: 11.5rem;
+		margin-top: 0.5rem;
+		overflow: visible;
+	}
+
+	.album-fan img {
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		width: 8rem;
+		height: 10.5rem;
+		object-fit: cover;
+		border: 1px solid var(--rd-gray-alpha-400);
+		border-radius: 0.9rem;
+		box-shadow: 0 6px 18px rgb(0 0 0 / 12%);
+		transform: translateX(calc(-50% + var(--fan-x))) rotate(var(--fan-angle));
+		transform-origin: 50% 100%;
+		transition: transform 0.35s ease;
+	}
+
+	.album-fan:hover img {
+		transform: translateX(calc(-50% + var(--fan-x))) rotate(calc(var(--fan-angle) * 1.4)) translateY(-6px);
+	}
+</style>
