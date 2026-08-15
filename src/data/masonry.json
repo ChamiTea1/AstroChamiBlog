@@ -83,5 +83,48 @@
 				"height": 690
 			}
 		]
+	},
+	{
+		"name": "壁纸",
+		"slug": "wallpapers",
+		"description": "高清壁纸合集",
+		"cover": "/images/wallpapers/ginkgo-leaves.jpg",
+		"items": [
+			{
+				"image": "/images/wallpapers/ginkgo-leaves.jpg",
+				"title": "银杏",
+				"description": "",
+				"width": 3840,
+				"height": 2160
+			},
+			{
+				"image": "/images/wallpapers/japan-artistic.jpg",
+				"title": "日系艺术",
+				"description": "",
+				"width": 3840,
+				"height": 2160
+			},
+			{
+				"image": "/images/wallpapers/kawaii-cat-girl.webp",
+				"title": "猫娘",
+				"description": "",
+				"width": 5120,
+				"height": 2880
+			},
+			{
+				"image": "/images/wallpapers/love-heart-tree.jpg",
+				"title": "爱心树",
+				"description": "",
+				"width": 3840,
+				"height": 2160
+			},
+			{
+				"image": "/images/wallpapers/milky-way.jpg",
+				"title": "银河",
+				"description": "",
+				"width": 3840,
+				"height": 2160
+			}
+		]
 	}
 ]
