@@ -1,6 +1,6 @@
 # Astro 移植 hexo-theme-redefine 代码审查报告
 
-> **修复状态（2026-08-15 同日验证并修复）**：问题 1、2、3、5、6、7、9 及全部低优先级代码项均已修复并重建验证（`astro check` 0 错误，build 通过，产物逐项核验）。问题 8 中 `navbar.auto_hide` 为**误报**（main.js:279 已实现且 CSS 有对应规则）；`first_item`/`toc.expand`/`recommendation.enable` 已实现，`mobile_limit` 因推荐卡片仅桌面端渲染而删除配置。问题 4（真实域名）与占位数据（essays/friends/bookmarks）需站长提供信息后处理，见文末。
+> **修复状态（2026-08-15 同日验证并修复）**：问题 1、2、3、5、6、7、9 及全部低优先级代码项均已修复并重建验证（`astro check` 0 错误，build 通过，产物逐项核验）。问题 8 中 `navbar.auto_hide` 为**误报**（main.js:279 已实现且 CSS 有对应规则）；`toc.expand`/`recommendation.enable` 已实现，`mobile_limit` 因推荐卡片仅桌面端渲染而删除配置；`first_item` 菜单卡片一度实现后按站长要求移除（配置同步删除）。问题 4（真实域名）与占位数据需站长提供信息后处理——占位数据已改为中文示例，见文末。
 
 > 审查日期：2026-08-15
 > 审查范围：`src/` 全部源码（配置、路由、内容集合、组件、布局、remark/rehype 插件、样式）、`public/scripts/main.js`、构建产物 `dist/`，并与原主题 [hexo-theme-redefine](https://github.com/EvanNotFound/hexo-theme-redefine) 做功能对比。

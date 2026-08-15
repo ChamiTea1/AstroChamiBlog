@@ -10,8 +10,6 @@ const tags = getTags(posts);
 const categories = getCategories(posts);
 const siteWordCount = posts.reduce((sum, post) => sum + getWordCount(post.body ?? '').words, 0);
 const sidebar = themeConfig.home.sidebar;
-const menuLinks = sidebar.links.filter((link) => link.path && link.path !== 'none');
-const sidebarFirstItem = sidebar.first_item === 'info' ? 'info' : 'menu';
 const announcement =
 	typeof sidebar.announcement === 'string' && sidebar.announcement.trim() ? sidebar.announcement : null;
 const authorLabel = themeConfig.articles.author_label.enable === true ? getAuthorLabel(posts.length) : '';
@@ -43,29 +41,8 @@ const recentCover = (post: (typeof posts)[number]) => {
 		'sticky post-home-aside',
 	]}
 >
-	{/* 菜单卡片：first_item 为 menu 时置于作者卡片之前 */}
-	{
-		sidebarFirstItem === 'menu' && menuLinks.length > 0 && (
-			<div class="rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 p-5 shadow-rd">
-				<ul class="flex flex-col gap-1">
-					{menuLinks.map((link) => (
-						<li>
-							<a
-								href={link.path}
-								class="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-rd-gray-1000 transition-colors hover:!bg-rd-gray-200/50 hover:!text-primary"
-							>
-								{link.icon && <i class={`${link.icon} w-5 text-center text-rd-gray-900`} aria-hidden="true"></i>}
-								<span>{link.label}</span>
-							</a>
-						</li>
-					))}
-				</ul>
-			</div>
-		)
-	}
-
 	{/* 作者卡片 */}
-	<div class:list={['rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 p-5 shadow-rd', sidebarFirstItem === 'menu' && 'mt-5']}>
+	<div class="rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 p-5 shadow-rd">
 		<div class="flex flex-col items-center">
 			<img
 				src={themeConfig.defaults.avatar}
@@ -77,27 +54,6 @@ const recentCover = (post: (typeof posts)[number]) => {
 			{authorLabel && <div class="mt-1.5 rounded-sm border border-rd-gray-alpha-400 px-2 py-0.5 text-xs text-rd-gray-900">{authorLabel}</div>}
 		</div>
 	</div>
-
-	{/* 菜单卡片：first_item 为 info 时置于作者卡片之后 */}
-	{
-		sidebarFirstItem === 'info' && menuLinks.length > 0 && (
-			<div class="mt-5 rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 p-5 shadow-rd">
-				<ul class="flex flex-col gap-1">
-					{menuLinks.map((link) => (
-						<li>
-							<a
-								href={link.path}
-								class="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-rd-gray-1000 transition-colors hover:!bg-rd-gray-200/50 hover:!text-primary"
-							>
-								{link.icon && <i class={`${link.icon} w-5 text-center text-rd-gray-900`} aria-hidden="true"></i>}
-								<span>{link.label}</span>
-							</a>
-						</li>
-					))}
-				</ul>
-			</div>
-		)
-	}
 
 	{/* 公告卡片 */}
 	{

@@ -171,7 +171,7 @@ export const themeConfig = {
 		sidebar: {
 			enable: true,
 			position: 'left' as 'left' | 'right',
-			first_item: 'menu' as 'menu' | 'info',
+			// first_item 菜单卡片已按站长要求移除，sidebar.links 仅用于移动端菜单（Navbar）
 			announcement: '欢迎来到我的小站~',
 			show_on_mobile: true,
 			links: [
