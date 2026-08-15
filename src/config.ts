@@ -157,6 +157,7 @@ export const themeConfig = {
 			{ label: 'Archives', path: '/archives', icon: 'fa-regular fa-archive' },
 			{ label: 'Tags', path: '/tags', icon: 'fa-regular fa-tags' },
 			{ label: 'Categories', path: '/categories', icon: 'fa-regular fa-folder' },
+			{ label: '相册', path: '/photos', icon: 'fa-regular fa-images' },
 			{ label: 'About', path: '/about', icon: 'fa-regular fa-user' },
 		] as { label: string; path: string; icon?: string; submenus?: { label: string; path: string }[] }[],
 		search: {
