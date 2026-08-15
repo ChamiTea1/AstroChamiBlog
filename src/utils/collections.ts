@@ -124,9 +124,10 @@ function normalizeList(value: string | string[] | undefined): string[] {
 	return list.filter(Boolean).map((item) => item.trim());
 }
 
-/** Rough plain-text excerpt from raw markdown. */
+/** Rough plain-text excerpt: prefers frontmatter description, falls back to body. */
 export function getExcerpt(post: Post, length = 200): string {
-	const text = stripMarkdown(post.body ?? '');
+	const description = typeof post.data.description === 'string' ? post.data.description.trim() : '';
+	const text = stripMarkdown(description || post.body || '');
 	if (text.length <= length) return text;
 	return `${text.slice(0, length).trimEnd()}…`;
 }
@@ -136,9 +137,11 @@ export function stripMarkdown(markdown: string): string {
 		.replace(/```[\s\S]*?```/g, ' ')
 		.replace(/~~~[\s\S]*?~~~/g, ' ')
 		.replace(/`[^`]*`/g, ' ')
+		.replace(/<!--[\s\S]*?-->/g, ' ')
+		.replace(/\{%[\s\S]*?%\}/g, ' ')
+		.replace(/<[^>]*>/g, ' ')
 		.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
 		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-		.replace(/\{%[\s\S]*?%\}/g, ' ')
 		.replace(/^#{1,6}\s+/gm, '')
 		.replace(/^>\s?/gm, '')
 		.replace(/^\s*[-*+]\s+/gm, '')
