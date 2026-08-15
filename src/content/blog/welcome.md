@@ -5,7 +5,7 @@ tags:
   - 随笔
 categories:
   - 随笔
-description: 新博客开张啦，记录生活与学习的点点滴滴。
+description: 新博客开张啦，记录生活与学习的点点滴滴。这里会分享学习笔记与踩坑记录、生活随笔与碎碎念，也会不定期更新游戏、番剧与猫猫日常，欢迎常来坐坐、交换友链。
 cover: 'https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/avatar/shaoye.jpg'
 coverPosition: 'right'
 ---
