@@ -61,7 +61,7 @@ export const themeConfig = {
 		},
 		open_graph: {
 			enable: true,
-			image: '/images/redefine-og.webp',
+			image: 'https://cdn.jsdelivr.net/gh/ChamiTea1/img-bed@main/avatar/shaoye.jpg',
 			description: siteConfig.description,
 		},
 		google_analytics: {
