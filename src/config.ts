@@ -8,7 +8,7 @@ export const siteConfig = {
 	title: '茶糜的小站',
 	subtitle: '记录生活与学习的点点滴滴',
 	author: '茶糜',
-	url: 'https://example.com',
+	url: 'https://chami.asia',
 	language: 'zh-CN',
 	description: '记录生活与学习的点点滴滴。',
 };

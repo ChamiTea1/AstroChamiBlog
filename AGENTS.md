@@ -72,6 +72,6 @@ astro dev --background
 
 ## 部署前检查清单
 
-- `src/config.ts` 的 `url` 改为真实域名（当前是占位符 `https://example.com`，会污染 RSS/sitemap/OG）。
-- 替换 `src/data/` 下的示例数据（essays/friends/bookmarks 目前是英文示例）。
+- `src/config.ts` 的 `url` 已设为 `https://chami.asia`（2026-08-15）；若换域名改这里并重新构建。
+- `src/data/` 的 essays/friends/bookmarks 目前是中文示例数据，上线前替换为真实内容。
 - 确认 favicon 指向（当前配置指向外部图床头像，`public/favicon.ico`/`favicon.svg` 未被引用）。
