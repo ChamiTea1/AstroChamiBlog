@@ -136,11 +136,7 @@ export const themeConfig = {
 		social_links: {
 			enable: true,
 			style: 'default' as 'default' | 'reverse' | 'center',
-			links: [
-				{ name: 'github', icon: 'fa-brands fa-github', url: 'https://github.com/' },
-				{ name: 'twitter', icon: 'fa-brands fa-twitter', url: '' },
-				{ name: 'email', icon: 'fa-solid fa-at', url: 'you@example.com' },
-			] as { name?: string; icon?: string; url: string }[],
+			links: [] as { name?: string; icon?: string; url: string }[],
 			qrs: [] as { name?: string; icon?: string; qr: string }[],
 		},
 	},

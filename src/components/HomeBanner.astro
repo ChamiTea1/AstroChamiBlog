@@ -78,7 +78,9 @@ const bannerStyle = themeConfig.home_banner.style;
 								>
 									<i class="fa-solid fa-arrow-down fa-fw fa-lg transition-transform hover:translate-y-1" aria-hidden="true"></i>
 								</button>
-								<div class="flex flex-row items-center gap-3 rounded-full border border-white/20 bg-gray-300/50 px-6 py-3 backdrop-blur-lg dark:border-gray-500/30 dark:bg-gray-500/40">
+								{
+									(links.length > 0 || hasQrs) && (
+										<div class="flex flex-row items-center gap-3 rounded-full border border-white/20 bg-gray-300/50 px-6 py-3 backdrop-blur-lg dark:border-gray-500/30 dark:bg-gray-500/40">
 									{
 										links.map((item) => {
 											const name = item.name || '';
@@ -134,6 +136,8 @@ const bannerStyle = themeConfig.home_banner.style;
 										)
 									}
 								</div>
+									)
+								}
 							</div>
 						)
 					}
