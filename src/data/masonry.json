@@ -1,16 +1,87 @@
 [
 	{
-		"image": "/images/wallhaven-wqery6-light.webp",
-		"title": "山景",
-		"description": "明信片般的山间风景",
-		"width": 1920,
-		"height": 1080
-	},
-	{
-		"image": "/images/wallhaven-wqery6-dark.webp",
-		"title": "夜景",
-		"description": "暗色模式壁纸",
-		"width": 1920,
-		"height": 1080
+		"name": "加菲猫",
+		"slug": "garfield",
+		"description": "加菲猫主题测试相册",
+		"cover": "/images/garfield/garfield-02.jpg",
+		"items": [
+			{
+				"image": "/images/garfield/garfield-01.avif",
+				"title": "加菲猫 01",
+				"description": "",
+				"width": 1280,
+				"height": 720
+			},
+			{
+				"image": "/images/garfield/garfield-02.jpg",
+				"title": "加菲猫 02",
+				"description": "",
+				"width": 1440,
+				"height": 1080
+			},
+			{
+				"image": "/images/garfield/garfield-03.jpg",
+				"title": "加菲猫 03",
+				"description": "",
+				"width": 1440,
+				"height": 1920
+			},
+			{
+				"image": "/images/garfield/garfield-04.jpg",
+				"title": "加菲猫 04",
+				"description": "",
+				"width": 1920,
+				"height": 1440
+			},
+			{
+				"image": "/images/garfield/garfield-05.jpg",
+				"title": "加菲猫 05",
+				"description": "",
+				"width": 1440,
+				"height": 1080
+			},
+			{
+				"image": "/images/garfield/garfield-06.jpg",
+				"title": "加菲猫 06",
+				"description": "",
+				"width": 1440,
+				"height": 1920
+			},
+			{
+				"image": "/images/garfield/garfield-07.jpg",
+				"title": "加菲猫 07",
+				"description": "",
+				"width": 1440,
+				"height": 1920
+			},
+			{
+				"image": "/images/garfield/garfield-08.webp",
+				"title": "加菲猫 08",
+				"description": "",
+				"width": 1080,
+				"height": 582
+			},
+			{
+				"image": "/images/garfield/garfield-09.jpg",
+				"title": "加菲猫 09",
+				"description": "",
+				"width": 1776,
+				"height": 1865
+			},
+			{
+				"image": "/images/garfield/garfield-10.png",
+				"title": "加菲猫 10",
+				"description": "",
+				"width": 1658,
+				"height": 945
+			},
+			{
+				"image": "/images/garfield/garfield-11.jpg",
+				"title": "加菲猫 11",
+				"description": "",
+				"width": 690,
+				"height": 690
+			}
+		]
 	}
 ]

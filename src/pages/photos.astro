@@ -2,12 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageTitle from '../components/PageTitle.astro';
 import { __ } from '../i18n';
-import masonryData from '../data/masonry.json';
+import albumsData from '../data/masonry.json';
 
 interface MasonryItem {
 	image?: string;
-	url?: string;
-	src?: string;
 	title?: string;
 	description?: string;
 	width?: number;
@@ -15,26 +13,56 @@ interface MasonryItem {
 	exif?: boolean;
 }
 
-const photos = masonryData as MasonryItem[];
+interface MasonryAlbum {
+	name: string;
+	slug: string;
+	cover?: string;
+	description?: string;
+	items?: MasonryItem[];
+}
+
+const albums = (albumsData as unknown as MasonryAlbum[]).filter((album) => album.slug && album.name);
 
 const title = __('photos');
-const hasExif = photos.some((entry) => entry.exif === true);
 ---
 
 <BaseLayout title={title}>
 	<div id="main-content" class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5">
 		<div class="py-8 sm:py-0">
 			<PageTitle title={title} showBorder />
-			<div id="masonry-container" class="relative block min-h-screen opacity-100" data-masonry-data-url="/masonry/data.json" aria-busy="false">
-			</div>
-			<div id="masonry-loadmore" class="my-5 mb-2.5 flex min-h-7 items-center justify-center gap-2.5 text-sm text-rd-gray-1000" aria-live="polite" hidden>
-				<span class="size-5 animate-spin rounded-full border-2 border-rd-gray-alpha-400 border-t-primary" aria-hidden="true"></span>
-				<span class="sr-only">{__('masonry_loading')}</span>
-			</div>
-			<div id="masonry-sentinel" class="h-px w-full" aria-hidden="true"></div>
+			{
+				albums.length > 0 ? (
+					<ul class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+						{albums.map((album) => (
+							<li>
+								<a
+									href={`/photos/${album.slug}/`}
+									class="group flex flex-col overflow-hidden rounded-2xl border border-rd-gray-alpha-400 bg-rd-background-100 shadow-rd transition-colors duration-300 hover:border-primary/40"
+								>
+									<div class="aspect-[4/3] w-full overflow-hidden bg-rd-gray-100">
+										<img
+											src={album.cover}
+											alt={album.name}
+											class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+											loading="lazy"
+											decoding="async"
+										/>
+									</div>
+									<div class="flex flex-col gap-1.5 p-4">
+										<div class="flex items-baseline justify-between gap-2">
+											<span class="truncate text-lg font-bold text-rd-gray-1000 transition-colors group-hover:!text-primary">{album.name}</span>
+											<span class="shrink-0 text-xs text-rd-gray-900">{__('photos_count', String(album.items?.length ?? 0))}</span>
+										</div>
+										{album.description && <p class="line-clamp-2 text-sm text-rd-gray-900">{album.description}</p>}
+									</div>
+								</a>
+							</li>
+						))}
+					</ul>
+				) : (
+					<p class="py-10 text-center text-sm text-rd-gray-900">{__('photos_empty')}</p>
+				)
+			}
 		</div>
 	</div>
-
-	<script defer src="/scripts/minimasonry.min.js" data-swup-reload-script></script>
-	{hasExif && <script defer src="/scripts/exif-reader.js" data-swup-reload-script></script>}
 </BaseLayout>
