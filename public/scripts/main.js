@@ -390,8 +390,10 @@
 		const w = bg.offsetWidth;
 		const h = bg.offsetHeight;
 		const rect = coverRect(cur, w, h);
-		const cols = 45;
-		const rows = 28;
+		/* 碎片数量 5 倍（45×28=1260 → 100×64=6400），密度与性能折中；小屏减到 50×32 */
+		const small = w < 768;
+		const cols = small ? 50 : 100;
+		const rows = small ? 32 : 64;
 		const cw = w / cols;
 		const ch = h / rows;
 		/* 风向：向左或向右吹，带 ±20° 随机倾角；上风处先起飞，波浪扫过全屏 */
@@ -400,8 +402,9 @@
 		const wy = Math.sin(windAngle);
 		const px = -wy; /* 垂直于风向，用于横向飘摆 */
 		const py = wx;
-		/* 抖动缺口延迟到起爆时才出现（静止时碎片层 = 完美无缝复刻原图，不提前破碎） */
-		const jag = () => Number((Math.random() * 6).toFixed(1));
+		/* 抖动缺口延迟到起爆时才出现（静止时碎片层 = 完美无缝复刻原图，不提前破碎）；
+		   缺口幅度按碎片大小同比放大（6% → 14%），保持锯齿的绝对观感 */
+		const jag = () => Number((Math.random() * 14).toFixed(1));
 
 		const layer = document.createElement('div');
 		layer.style.cssText = 'position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;perspective:900px;';
