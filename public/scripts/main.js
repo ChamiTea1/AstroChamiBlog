@@ -305,7 +305,7 @@
 	/* Home banner                                                 */
 	/* ---------------------------------------------------------- */
 
-	/* 临时预览：首页两张 banner 背景图每 2s 交替淡入淡出（需要保留时再抽成正式配置） */
+	/* 临时预览：首页两张 banner 背景图每 2s 交替（第一张常显作底，第二张淡入淡出，避免交叉透明露出白底） */
 	let bannerSwapTimer = null;
 
 	function initBannerSwapper() {
@@ -323,13 +323,18 @@
 		const apply = () => {
 			imgs.forEach((img, i) => {
 				img.style.display = 'block';
-				img.style.opacity = i === idx ? '1' : '0';
-				img.style.transition = 'opacity 0.6s ease';
+				if (i === 0) {
+					img.style.opacity = '1';
+					img.style.transition = 'none';
+				} else {
+					img.style.opacity = idx === 0 ? '0' : '1';
+					img.style.transition = 'opacity 0.6s ease';
+				}
 			});
 		};
 		apply();
 		bannerSwapTimer = window.setInterval(() => {
-			idx = (idx + 1) % imgs.length;
+			idx = (idx + 1) % 2;
 			apply();
 		}, 2000);
 	}
