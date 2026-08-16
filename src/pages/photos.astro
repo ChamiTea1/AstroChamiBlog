@@ -41,7 +41,8 @@ const RAD = Math.PI / 180;
  * 取相册最多 5 张图：默认扇形堆叠；悬停时像折扇一样张开——
  * 铰链圆心 P 在卡片底边下方，所有底边相切于该铰链圆（半径 hingeR），
  * 每张扇骨沿圆依次滑动 30°，展开成 120° 的扇形。
- * 最左一张的中心钉在原地（只随扇形旋转），其余从最右开始依次滑出。
+ * 最左一张完全钉死在原地（展开角 theta0 取其静止倾角，展开位 == 静止位），
+ * 其余从最右开始沿切线圆向右单侧展开、依次滑出。
  * --x/--y/--rot 为静止姿态；--cx/--cy/--arc-rot 为张开后的位置与旋转角。
  */
 const fanFor = (album: MasonryAlbum): FanImage[] => {
@@ -53,11 +54,11 @@ const fanFor = (album: MasonryAlbum): FanImage[] => {
 	const step = 30; // 每张沿铰链圆滑动 30°
 	const stagger = 70; // 从最右边开始，向左每张延迟 70ms
 
-	// 最左卡片的静止姿态（其中心被钉在原地）
+	// 最左卡片的静止姿态（完全钉在原地：展开角 = 静止倾角，展开位 == 静止位）
 	const t0 = -(count - 1) / 2;
 	const x0 = t0 * 30;
 	const y0 = 8;
-	const theta0 = -((count - 1) / 2) * step; // 张开后最左扇骨的角度
+	const theta0 = t0 * 14; // 张开后最左扇骨的角度，与静止姿态 rot 一致
 
 	// 反解铰链圆心 P：card 中心 = P + (hingeR + cardHalfH) · (sinθ, -cosθ)
 	const arm = hingeR + cardHalfH;
@@ -140,17 +141,20 @@ const title = __('photos');
 </BaseLayout>
 
 <style>
-	/* 子相册封面：默认多图扇形堆叠；悬停时沿底边公共切线圆展开——
-	   最左一张不动，其余每张 +30°，从最右边开始依次滑出 */
+	/* 子相册封面：默认多图扇形堆叠；悬停时整体上浮与扇形展开同时进行——
+	   沿底边公共切线圆向右单侧展开：最左一张相对扇面不动，
+	   其余每张 +30°，从最右边开始依次滑出 */
 	.album-fan {
 		position: relative;
 		height: 13rem;
 		margin-top: 0.5rem;
 		overflow: visible;
+		transition: transform 0.55s cubic-bezier(0.33, 1.15, 0.45, 1);
 	}
 
 	.album-fan:hover {
 		z-index: 30;
+		transform: translateY(-14px); /* 与展开同步的整体上浮 */
 	}
 
 	.album-fan img {
@@ -172,6 +176,7 @@ const title = __('photos');
 	.album-fan:hover img {
 		transform: translate(calc(-50% + var(--cx)), calc(-50% + var(--cy))) rotate(var(--arc-rot));
 		box-shadow: 0 16px 32px rgb(0 0 0 / 22%);
+		/* 与上浮同时开始展开，仍从最右开始依次滑出 */
 		transition-delay: var(--delay, 0ms);
 	}
 </style>
