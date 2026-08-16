@@ -31,33 +31,56 @@ interface FanImage {
 	rot: number;
 	cx: number;
 	cy: number;
-	wheelRot: number;
+	arcRot: number;
+	delay: number;
 }
 
+const RAD = Math.PI / 180;
+
 /**
- * 取相册最多 5 张图：默认扇形堆叠；悬停时浮起、围绕圆心展开成「摩天轮」圆环——
- * 每张图旋转到圆周切线方向（底部图片倒置）。
- * --x/--y/--rot 为扇形姿态，--cx/--cy 为圆形位置，--wheel-rot 为环上切线旋转角。
+ * 取相册最多 5 张图：默认扇形堆叠；悬停时展开——
+ * 最左一张保持不动（作为锚点），其余每张沿「所有图片底边共同的切线圆」
+ * 依次滑动 30°，卡片旋转到该位置的切线方向（底边始终与圆相切）。
+ * 动画从最右边的图片开始，向左逐张延迟。
+ * --x/--y/--rot 为扇形静止姿态；--cx/--cy/--arc-rot 为展开位置与切线旋转角。
  */
 const fanFor = (album: MasonryAlbum): FanImage[] => {
 	const images = (album.items ?? []).filter((item) => item.image);
 	if (images.length === 0) return [];
 	const count = Math.min(5, images.length);
-	const radius = 140; // 环太小会让牌挤成一团，放大半径让牌明显铺开
+	const cardHalfH = 84; // 卡片高 10.5rem 的一半（底边中点到中心）
+	const radius = 150; // 底边公共切线圆半径
+	const step = 30; // 每张沿切线圆滑动 30°
+	const stagger = 70; // 从最右边开始，向左每张延迟 70ms
+
 	const fan: FanImage[] = [];
 	for (let i = 0; i < count; i++) {
 		const index = count === 1 ? 0 : Math.round((i * (images.length - 1)) / (count - 1));
 		const t = i - (count - 1) / 2;
-		const theta = -Math.PI / 2 + (i * 2 * Math.PI) / count;
+		const x = t * 30;
+		const y = 8;
+		const rot = t * 14;
+
+		// 锚点：最左卡片的静止旋转角及其底边中点（切线点 T，相对容器中心）
+		const anchor = -((count - 1) / 2) * 14 * RAD;
+		const tx = x + cardHalfH * Math.sin(anchor);
+		const ty = y + cardHalfH * Math.cos(anchor);
+
+		// 展开后第 i 张的切线角：从锚点起每张 +30°，沿圆滑动后的卡片中心
+		const beta = anchor + i * step * RAD;
+		const cx = tx + radius * (Math.sin(beta) - Math.sin(anchor)) - cardHalfH * Math.sin(beta);
+		const cy = ty + radius * (Math.cos(beta) - Math.cos(anchor)) - cardHalfH * Math.cos(beta);
+
 		fan.push({
 			image: images[index].image as string,
 			alt: images[index].title || album.name,
-			x: t * 30,
-			y: 8,
-			rot: t * 14,
-			cx: Math.round(radius * Math.cos(theta)),
-			cy: Math.round(radius * Math.sin(theta)),
-			wheelRot: (i * 360) / count,
+			x,
+			y,
+			rot,
+			cx: Math.round(cx),
+			cy: Math.round(cy),
+			arcRot: Math.round((beta / RAD) * 10) / 10,
+			delay: (count - 1 - i) * stagger,
 		});
 	}
 	return fan;
@@ -90,7 +113,7 @@ const title = __('photos');
 															alt={img.alt}
 															loading="lazy"
 															decoding="async"
-															style={`--x: ${img.x}px; --y: ${img.y}px; --rot: ${img.rot}deg; --cx: ${img.cx}px; --cy: ${img.cy}px; --wheel-rot: ${img.wheelRot}deg; z-index: ${i + 1};`}
+															style={`--x: ${img.x}px; --y: ${img.y}px; --rot: ${img.rot}deg; --cx: ${img.cx}px; --cy: ${img.cy}px; --arc-rot: ${img.arcRot}deg; --delay: ${img.delay}ms; z-index: ${i + 1};`}
 														/>
 													))}
 												</div>
@@ -119,7 +142,8 @@ const title = __('photos');
 </BaseLayout>
 
 <style>
-	/* 子相册封面：默认多图扇形堆叠，悬停时浮起并展开为圆形 */
+	/* 子相册封面：默认多图扇形堆叠；悬停时沿底边公共切线圆展开——
+	   最左一张不动，其余每张 +30°，从最右边开始依次滑出 */
 	.album-fan {
 		position: relative;
 		height: 11.5rem;
@@ -143,12 +167,13 @@ const title = __('photos');
 		transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
 		transform-origin: 50% 50%;
 		transition:
-			transform 0.45s cubic-bezier(0.34, 1.3, 0.5, 1),
-			box-shadow 0.45s ease;
+			transform 0.55s cubic-bezier(0.33, 1.15, 0.45, 1),
+			box-shadow 0.55s ease;
 	}
 
 	.album-fan:hover img {
-		transform: translate(calc(-50% + var(--cx)), calc(-50% + var(--cy))) rotate(var(--wheel-rot));
+		transform: translate(calc(-50% + var(--cx)), calc(-50% + var(--cy))) rotate(var(--arc-rot));
 		box-shadow: 0 16px 32px rgb(0 0 0 / 22%);
+		transition-delay: var(--delay, 0ms);
 	}
 </style>
