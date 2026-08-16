@@ -2283,8 +2283,25 @@
 		}
 	}
 
+	/* 相册/音乐一级页：每次进入随机换一张模糊 banner 封面 */
+	function initRandomBanner() {
+		const img = $('#photos-banner-img') || $('#music-banner-img');
+		if (!img || !img.dataset.covers) return;
+		let covers = [];
+		try {
+			const parsed = JSON.parse(img.dataset.covers);
+			if (Array.isArray(parsed)) covers = parsed.map(String).filter(Boolean);
+		} catch {
+			return;
+		}
+		if (covers.length < 2) return;
+		const pick = covers[Math.floor(Math.random() * covers.length)];
+		if (pick) img.src = pick;
+	}
+
 	function initPage() {
 		initPageType();
+		initRandomBanner();
 		cleanupMusicPage();
 		initNavbarPage();
 		initSideTools();

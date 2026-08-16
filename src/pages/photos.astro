@@ -22,7 +22,6 @@ interface MasonryAlbum {
 }
 
 const albums = (albumsData as unknown as MasonryAlbum[]).filter((album) => album.slug && album.name);
-const bannerCover = albums[0]?.cover;
 
 interface FanImage {
 	image: string;
@@ -87,13 +86,21 @@ const fanFor = (album: MasonryAlbum): FanImage[] => {
 };
 
 const title = __('photos');
+const coverPool = albums.map((album) => album.cover).filter(Boolean) as string[];
+const bannerCover = coverPool[0];
 ---
 
 <BaseLayout title={title}>
 	{
 		bannerCover && (
 			<div slot="banner" aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-				<img src={bannerCover} alt="" class="h-full w-full scale-125 object-cover blur-[16px] dark:brightness-75 dark:saturate-[0.85]" />
+				<img
+					id="photos-banner-img"
+					src={bannerCover}
+					alt=""
+					data-covers={JSON.stringify(coverPool)}
+					class="h-full w-full scale-125 object-cover blur-[16px] dark:brightness-75 dark:saturate-[0.85]"
+				/>
 				<div class="page-banner-overlay page-banner-overlay-light dark:hidden"></div>
 				<div class="page-banner-overlay page-banner-overlay-dark hidden dark:block"></div>
 			</div>
