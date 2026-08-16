@@ -155,6 +155,7 @@ export const themeConfig = {
 		links: [
 			{ label: 'Home', path: '/', icon: 'fa-regular fa-house' },
 			{ label: '相册', path: '/photos', icon: 'fa-regular fa-images' },
+			{ label: '音乐', path: '/music', icon: 'fa-regular fa-music' },
 			{ label: 'Archives', path: '/archives', icon: 'fa-regular fa-archive' },
 			{ label: 'Tags', path: '/tags', icon: 'fa-regular fa-tags' },
 			{ label: 'Categories', path: '/categories', icon: 'fa-regular fa-folder' },
@@ -360,6 +361,12 @@ export const themeConfig = {
 		},
 		// MetingJS 自定义解析 API（留空则用默认公共 API），参考 LuviciiBlog 的 asset.meting_api
 		meting_api: '',
+		// 音乐页（/music）：MetingJS 播放器参数，默认网易云歌曲（可逗号分隔多首）
+		music: {
+			server: 'netease',
+			type: 'song',
+			id: '2600128849,2722447989,2709131641,3346496288,3409635654',
+		},
 	},
 
 	inject: {

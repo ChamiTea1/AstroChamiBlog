@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageTitle from '../components/PageTitle.astro';
+import { themeConfig } from '../config';
+import { __ } from '../i18n';
+
+const title = __('music');
+const music = themeConfig.plugins.music;
+---
+
+<BaseLayout title={title}>
+	<div id="main-content" class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5">
+		<div class="py-8 sm:py-0">
+			<PageTitle title={title} showBorder />
+			<div class="aplayer-inline my-4">
+				<meting-js
+					server={music.server}
+					type={music.type}
+					id={music.id}
+					mutex="true"
+					preload="none"
+					theme="var(--primary-color)"
+					order="list"
+				></meting-js>
+			</div>
+			<p class="text-sm text-rd-gray-900">{__('music_tip')}</p>
+		</div>
+	</div>
+</BaseLayout>
