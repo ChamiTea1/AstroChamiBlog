@@ -305,6 +305,35 @@
 	/* Home banner                                                 */
 	/* ---------------------------------------------------------- */
 
+	/* 临时预览：首页两张 banner 背景图每 2s 交替淡入淡出（需要保留时再抽成正式配置） */
+	let bannerSwapTimer = null;
+
+	function initBannerSwapper() {
+		const bg = $('#home-banner-background');
+		if (!bg) {
+			if (bannerSwapTimer) {
+				window.clearInterval(bannerSwapTimer);
+				bannerSwapTimer = null;
+			}
+			return;
+		}
+		const imgs = [...bg.querySelectorAll('img')];
+		if (imgs.length < 2 || bannerSwapTimer) return;
+		let idx = 0;
+		const apply = () => {
+			imgs.forEach((img, i) => {
+				img.style.display = 'block';
+				img.style.opacity = i === idx ? '1' : '0';
+				img.style.transition = 'opacity 0.6s ease';
+			});
+		};
+		apply();
+		bannerSwapTimer = window.setInterval(() => {
+			idx = (idx + 1) % imgs.length;
+			apply();
+		}, 2000);
+	}
+
 	function initHomeBanner() {
 		const scrollButton = $('#scroll-to-main');
 		scrollButton?.addEventListener('click', () => {
@@ -1901,6 +1930,10 @@
 		player.setAttribute('server', server);
 		player.setAttribute('type', type);
 		player.setAttribute('id', id);
+		if (server === 'custom') {
+			/* 自建直链歌单：每个歌单对应构建期生成的静态 Meting JSON（src/data/custom-music/<id>.json），不走公共解析 API */
+			player.setAttribute('api', `/music/custom-songs/${encodeURIComponent(id)}.json`);
+		}
 		player.setAttribute('mutex', 'true');
 		player.setAttribute('preload', 'auto');
 		player.setAttribute('theme', 'var(--primary-color)');
@@ -2394,6 +2427,7 @@
 		initSideTools();
 		initSidebarClamp();
 		initHomeBanner();
+		initBannerSwapper();
 		initTyped();
 		relativeTimeInHome();
 		initTOC();
