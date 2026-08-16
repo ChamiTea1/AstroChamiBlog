@@ -7,10 +7,20 @@ import { musicPlayUrl, type PlaylistEntry } from '../utils/music';
 
 const title = __('music');
 const playlists = (musicData as unknown as PlaylistEntry[]).filter((p) => p.id && p.name);
+const bannerCover = playlists[0]?.cover || '';
 const serverName = (server: string) => (server === 'tencent' ? 'QQ音乐' : '网易云音乐');
 ---
 
 <BaseLayout title={title}>
+	{
+		bannerCover && (
+			<div slot="banner" aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+				<img src={bannerCover} alt="" class="h-full w-full scale-125 object-cover blur-[16px] dark:brightness-75 dark:saturate-[0.85]" />
+				<div class="page-banner-overlay page-banner-overlay-light dark:hidden"></div>
+				<div class="page-banner-overlay page-banner-overlay-dark hidden dark:block"></div>
+			</div>
+		)
+	}
 	<div id="main-content" class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5">
 		<div class="py-8 sm:py-0">
 			<PageTitle title={title} showBorder />
