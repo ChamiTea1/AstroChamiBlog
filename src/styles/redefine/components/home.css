@@ -88,3 +88,10 @@
     --home-title-size: 1.5rem;
   }
 }
+
+/* 移动端竖屏（含平板竖屏）隐藏首页左侧侧栏卡片 */
+@media (orientation: portrait) and (max-width: 1024px) {
+  .home-sidebar {
+    display: none !important;
+  }
+}
