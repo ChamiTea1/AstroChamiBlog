@@ -306,7 +306,7 @@
 	/* ---------------------------------------------------------- */
 
 	/* 首页 banner 多图轮换 + 玻璃击碎特效：每 8s 换一张，
-	   旧图从随机撞击点波纹式碎成不规则多边形、3D 翻滚抛散下坠，新图垫底轻微落定缩放 */
+	   旧图从随机撞击点波纹式碎成不规则多边形、3D 翻滚抛散下坠，新图垫底静止 */
 	const BANNER_SWAP_INTERVAL = 8000;
 	let bannerSwapTimer = null;
 	let bannerShatterLock = false;
@@ -381,15 +381,11 @@
 		bannerShatterLock = true;
 		const { bg, cur, nxt } = stage;
 
-		/* 新图垫底，1.06 → 1 落定缩放 */
+		/* 新图垫底完全静止（不缩放落定：任何缩放都会让图顶/图底在破碎开始时上下动一下） */
 		nxt.style.transition = 'none';
 		nxt.src = nextSrc;
 		nxt.style.opacity = '1';
-		nxt.style.transform = 'scale(1.06)';
-		requestAnimationFrame(() => {
-			nxt.style.transition = 'transform 1.2s cubic-bezier(0.22, 0.61, 0.36, 1)';
-			nxt.style.transform = 'scale(1)';
-		});
+		nxt.style.transform = 'none';
 
 		const w = bg.offsetWidth;
 		const h = bg.offsetHeight;

@@ -22,9 +22,9 @@
 	},
 	{
 		"name": "百听不厌的周杰伦",
-		"server": "tencent",
+		"server": "custom",
 		"type": "playlist",
-		"id": "7039749142",
+		"id": "jay-chou",
 		"cover": "https://qpic.y.qq.com/music_cover/0cthhV0GM91gWJWQ95ibGRGtXgKTNzsA9WnIZvH915S1UKmUibiattibew/300?n=1"
 	}
 ]

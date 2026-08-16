@@ -10,12 +10,18 @@ const title = __('music');
 const playlists = (musicData as unknown as PlaylistEntry[]).filter((p) => p.id && p.name);
 const coverPool = playlists.map((p) => p.cover).filter(Boolean) as string[];
 const bannerCover = coverPool[0] || '';
-const serverName = (server: string) => (server === 'tencent' ? __('music_platform_tencent') : __('music_platform_netease'));
+const serverName = (server: string) =>
+	server === 'tencent'
+		? __('music_platform_tencent')
+		: server === 'custom'
+			? __('music_platform_custom')
+			: __('music_platform_netease');
 
 const playlistUrls = playlists.map((p) => musicPlayUrl(p));
 const totalCount = playlists.length;
-const neteaseCount = playlists.filter((p) => p.server !== 'tencent').length;
+const neteaseCount = playlists.filter((p) => p.server === 'netease').length;
 const tencentCount = playlists.filter((p) => p.server === 'tencent').length;
+const customCount = playlists.filter((p) => p.server === 'custom').length;
 ---
 
 <BaseLayout title={title}>
@@ -85,7 +91,7 @@ const tencentCount = playlists.filter((p) => p.server === 'tencent').length;
 					<SideCard icon="fa-regular fa-chart-simple" title={__('music_stats')}>
 						<p class="text-sm text-rd-gray-900">{__('music_stats_count', String(totalCount))}</p>
 						<p class="mt-1 text-xs text-rd-gray-900">
-							{__('music_platform_netease')}: {neteaseCount} · {__('music_platform_tencent')}: {tencentCount}
+							{__('music_platform_netease')}: {neteaseCount} · {__('music_platform_tencent')}: {tencentCount} · {__('music_platform_custom')}: {customCount}
 						</p>
 					</SideCard>
 				</div>

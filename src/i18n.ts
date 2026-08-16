@@ -82,6 +82,7 @@ const en = {
 	music_stats_count: '%s playlists',
 	music_platform_netease: 'NetEase',
 	music_platform_tencent: 'QQ Music',
+	music_platform_custom: 'Self-hosted',
 	image_viewer: 'Image viewer',
 	expired: 'This post is written %s days ago, and the content may not be up to date.',
 	exif: {
@@ -224,6 +225,7 @@ const zhCN: typeof en = {
 	music_stats_count: '%s 个歌单',
 	music_platform_netease: '网易云音乐',
 	music_platform_tencent: 'QQ音乐',
+	music_platform_custom: '自建',
 	image_viewer: '图片查看器',
 	expired: '这篇文章最后更新于 %s 天前，内容可能已经过时。',
 	exif: {
