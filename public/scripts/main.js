@@ -1700,6 +1700,161 @@
 	}
 
 	/* ---------------------------------------------------------- */
+	/* Music page: playlist list + player                          */
+	/* ---------------------------------------------------------- */
+
+	const MUSIC_STORE_KEY = 'REDEFINE-MUSIC-PLAYLISTS';
+
+	const escHtml = (value) =>
+		String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+
+	const getMusicStore = () => {
+		try {
+			const parsed = JSON.parse(localStorage.getItem(MUSIC_STORE_KEY) || '[]');
+			return Array.isArray(parsed) ? parsed : [];
+		} catch {
+			return [];
+		}
+	};
+
+	const saveMusicStore = (list) => {
+		try {
+			localStorage.setItem(MUSIC_STORE_KEY, JSON.stringify(list));
+		} catch {
+			/* ignore */
+		}
+	};
+
+	const musicApi = () => window.meting_api || 'https://api.i-meto.com/meting/api';
+
+	const parsePlaylistInput = (raw, server) => {
+		const text = String(raw || '').trim();
+		if (!text) return null;
+		if (/^\d+$/.test(text)) return text;
+		const match =
+			server === 'tencent'
+				? text.match(/playlist\/(\d+)/i)
+				: text.match(/playlist[?/=](\d+)/i) || text.match(/playlist\/(\d+)/i);
+		return match ? match[1] : null;
+	};
+
+	const musicCardHtml = (item, removable) => {
+		const href = `/music/play/?server=${encodeURIComponent(item.server)}&type=${encodeURIComponent(item.type || 'playlist')}&id=${encodeURIComponent(item.id)}&name=${encodeURIComponent(item.name || '')}`;
+		const serverLabel = item.server === 'tencent' ? 'QQ音乐' : '网易云音乐';
+		const cover = item.cover
+			? `<img src="${escHtml(item.cover)}" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover" />`
+			: '<i class="fa-solid fa-music text-3xl" aria-hidden="true"></i>';
+		const remove = removable
+			? '<button type="button" data-music-remove class="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-rd-background-100/80 text-xs text-rd-gray-1000 backdrop-blur transition-colors hover:!text-primary" aria-label="删除"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>'
+			: '';
+		return `<li class="relative">${remove}<a href="${href}" class="group flex flex-col"><div class="music-cover flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-rd-gray-alpha-400 text-rd-gray-900">${cover}</div><div class="flex flex-col px-1 pt-2"><span class="truncate text-sm font-medium text-rd-gray-1000 group-hover:!text-primary">${escHtml(item.name || '歌单')}</span><span class="text-xs text-rd-gray-900">${escHtml(serverLabel)}</span></div></a></li>`;
+	};
+
+	let musicListWired = false;
+
+	function initMusicList() {
+		const list = $('#music-list');
+		if (!list) return;
+
+		const render = () => {
+			$$('[data-music-user-card]', list).forEach((el) => el.remove());
+			const fragment = document.createDocumentFragment();
+			getMusicStore().forEach((item) => {
+				const wrapper = document.createElement('div');
+				wrapper.innerHTML = musicCardHtml(item, true);
+				const node = wrapper.firstElementChild;
+				if (!node) return;
+				node.dataset.musicUserCard = 'true';
+				fragment.appendChild(node);
+			});
+			list.appendChild(fragment);
+		};
+		render();
+
+		if (!musicListWired) {
+			musicListWired = true;
+			const form = $('#music-add-form');
+			form?.addEventListener('submit', async (event) => {
+				event.preventDefault();
+				const hint = $('#music-add-hint');
+				if (hint) hint.classList.add('hidden');
+				const server = $('#music-add-server')?.value || 'netease';
+				const id = parsePlaylistInput($('#music-add-id')?.value || '', server);
+				if (!id) {
+					if (hint) {
+						hint.textContent = t('music_add_invalid', 'Could not parse a playlist ID from the input.');
+						hint.classList.remove('hidden');
+					}
+					return;
+				}
+				const name = ($('#music-add-name')?.value || '').trim();
+				let cover = '';
+				try {
+					const res = await fetch(`${musicApi()}?server=${server}&type=playlist&id=${id}`);
+					const data = await res.json();
+					if (Array.isArray(data) && data.length > 0 && data[0].pic) cover = String(data[0].pic);
+				} catch {
+					/* ignore */
+				}
+				const items = getMusicStore();
+				items.push({
+					server,
+					type: 'playlist',
+					id,
+					name: name || `${server === 'tencent' ? 'QQ' : '网易云'}歌单 ${id}`,
+					cover,
+				});
+				saveMusicStore(items);
+				render();
+				form.reset();
+			});
+
+			document.addEventListener('click', (event) => {
+				const btn = event.target.closest('[data-music-remove]');
+				if (!btn) return;
+				const card = btn.closest('[data-music-user-card]');
+				const href = card?.querySelector('a')?.getAttribute('href') || '';
+				const id = new URLSearchParams(href.split('?')[1] || '').get('id');
+				saveMusicStore(getMusicStore().filter((item) => String(item.id) !== id));
+				card?.remove();
+			});
+		}
+	}
+
+	function initMusicPlay() {
+		const mount = $('#music-player');
+		if (!mount) return;
+		const params = new URLSearchParams(window.location.search);
+		const server = params.get('server') || 'netease';
+		const type = params.get('type') || 'playlist';
+		const id = params.get('id') || '';
+		const name = params.get('name') || '';
+		const nameDom = $('#music-play-name');
+		if (nameDom) nameDom.textContent = name;
+		if (!id || mount.dataset.musicId === `${server}:${type}:${id}`) return;
+		mount.dataset.musicId = `${server}:${type}:${id}`;
+		mount.innerHTML = '';
+		const box = document.createElement('div');
+		box.className = 'aplayer-inline my-4';
+		const player = document.createElement('meting-js');
+		player.setAttribute('server', server);
+		player.setAttribute('type', type);
+		player.setAttribute('id', id);
+		player.setAttribute('mutex', 'true');
+		player.setAttribute('preload', 'none');
+		player.setAttribute('theme', 'var(--primary-color)');
+		player.setAttribute('order', 'list');
+		box.appendChild(player);
+		mount.appendChild(box);
+		initInlineAudio();
+	}
+
+	function initMusic() {
+		initMusicList();
+		initMusicPlay();
+	}
+
+	/* ---------------------------------------------------------- */
 	/* Essays dates                                                */
 	/* ---------------------------------------------------------- */
 
@@ -2036,6 +2191,7 @@
 		initMermaid();
 		initAPlayer();
 		initInlineAudio();
+		initMusic();
 		initEssays();
 		initBookmarkNav();
 		initMasonry();

@@ -361,12 +361,6 @@ export const themeConfig = {
 		},
 		// MetingJS 自定义解析 API（留空则用默认公共 API），参考 LuviciiBlog 的 asset.meting_api
 		meting_api: '',
-		// 音乐页（/music）：MetingJS 播放器参数，默认网易云歌曲（可逗号分隔多首）
-		music: {
-			server: 'netease',
-			type: 'song',
-			id: '2600128849,2722447989,2709131641,3346496288,3409635654',
-		},
 	},
 
 	inject: {

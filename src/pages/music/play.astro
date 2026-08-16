@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageTitle from '../../components/PageTitle.astro';
+import { __ } from '../../i18n';
+
+const title = __('music');
+---
+
+<BaseLayout title={title}>
+	<div id="main-content" class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5">
+		<div class="py-8 sm:py-0">
+			<PageTitle title={title} showBorder />
+			<div class="mb-4">
+				<a href="/music/" class="text-sm text-rd-gray-900 transition-colors hover:!text-primary">
+					<i class="fa-solid fa-chevron-left mr-1 text-xs" aria-hidden="true"></i>{__('music_back')}
+				</a>
+			</div>
+			<div id="music-play-name" class="mb-3 text-lg font-bold text-rd-gray-1000"></div>
+			<div id="music-player" class="min-h-24"></div>
+		</div>
+	</div>
+</BaseLayout>
