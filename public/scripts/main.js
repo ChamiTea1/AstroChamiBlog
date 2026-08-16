@@ -305,7 +305,7 @@
 	/* Home banner                                                 */
 	/* ---------------------------------------------------------- */
 
-	/* 临时预览：首页两张 banner 背景图每 2s 交替（第一张常显作底，第二张淡入淡出，避免交叉透明露出白底） */
+	/* 临时预览：首页 banner 背景图每 2s 换一张（直接换 src，无透明度过渡，绝不露白） */
 	let bannerSwapTimer = null;
 
 	function initBannerSwapper() {
@@ -319,23 +319,17 @@
 		}
 		const imgs = [...bg.querySelectorAll('img')];
 		if (imgs.length < 2 || bannerSwapTimer) return;
+		const srcs = imgs.map((img) => img.src);
+		const show = imgs[0];
+		show.style.display = 'block';
+		show.style.opacity = '1';
+		imgs.slice(1).forEach((img) => {
+			img.style.display = 'none';
+		});
 		let idx = 0;
-		const apply = () => {
-			imgs.forEach((img, i) => {
-				img.style.display = 'block';
-				if (i === 0) {
-					img.style.opacity = '1';
-					img.style.transition = 'none';
-				} else {
-					img.style.opacity = idx === 0 ? '0' : '1';
-					img.style.transition = 'opacity 0.6s ease';
-				}
-			});
-		};
-		apply();
 		bannerSwapTimer = window.setInterval(() => {
-			idx = (idx + 1) % 2;
-			apply();
+			idx = (idx + 1) % srcs.length;
+			if (show.src !== srcs[idx]) show.src = srcs[idx];
 		}, 2000);
 	}
 
