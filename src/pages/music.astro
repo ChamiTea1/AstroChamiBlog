@@ -9,6 +9,7 @@ interface PlaylistEntry {
 	server: string;
 	type: string;
 	id: string;
+	cover?: string;
 }
 
 const title = __('music');
@@ -29,7 +30,13 @@ const playUrl = (p: PlaylistEntry) =>
 						<li>
 							<a href={playUrl(p)} class="group flex flex-col">
 								<div class="music-cover flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-rd-gray-alpha-400 text-rd-gray-900">
-									<i class="fa-solid fa-music text-3xl" aria-hidden="true"></i>
+									{
+										p.cover ? (
+											<img src={p.cover} alt={p.name} loading="lazy" decoding="async" class="h-full w-full object-cover" />
+										) : (
+											<i class="fa-solid fa-music text-3xl" aria-hidden="true"></i>
+										)
+									}
 								</div>
 								<div class="flex flex-col px-1 pt-2">
 									<span class="truncate text-sm font-medium text-rd-gray-1000 group-hover:!text-primary">{p.name}</span>
