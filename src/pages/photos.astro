@@ -124,7 +124,7 @@ const recentAlbums = albums.slice(0, 3);
 		)
 	}
 	<div id="main-content" class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5">
-		<div class="flex items-start justify-center gap-10">
+		<div class="flex items-start justify-center gap-12">
 			<div class="min-w-0 flex-1">
 				<div class="py-8 sm:py-0">
 					<PageTitle title={title} showBorder />
@@ -176,7 +176,7 @@ const recentAlbums = albums.slice(0, 3);
 			</div>
 
 			<aside class="page-sidebar hidden w-60 shrink-0 md:block">
-				<div class="sticky top-[calc(var(--current-navbar-height)+1rem)] flex flex-col gap-6">
+				<div class="sticky top-[calc(var(--current-navbar-height)+1rem)] mt-32 flex flex-col gap-6">
 					<SideCard icon="fa-regular fa-chart-simple" title={__('photos_stats')}>
 						<p class="text-sm text-rd-gray-900">{__('photos_stats_count', String(albumCount), String(photoCount))}</p>
 					</SideCard>
