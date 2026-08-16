@@ -38,50 +38,46 @@ interface FanImage {
 const RAD = Math.PI / 180;
 
 /**
- * 取相册最多 5 张图：默认扇形堆叠；悬停时展开——
- * 最左一张保持不动（作为锚点），其余每张沿「所有图片底边共同的切线圆」
- * 依次滑动 30°，卡片旋转到该位置的切线方向（底边始终与圆相切）。
- * 动画从最右边的图片开始，向左逐张延迟。
- * --x/--y/--rot 为扇形静止姿态；--cx/--cy/--arc-rot 为展开位置与切线旋转角。
+ * 取相册最多 5 张图：默认扇形堆叠；悬停时像折扇一样张开——
+ * 铰链圆心 P 在卡片底边下方，所有底边相切于该铰链圆（半径 hingeR），
+ * 每张扇骨沿圆依次滑动 30°，展开成 120° 的扇形。
+ * 最左一张的中心钉在原地（只随扇形旋转），其余从最右开始依次滑出。
+ * --x/--y/--rot 为静止姿态；--cx/--cy/--arc-rot 为张开后的位置与旋转角。
  */
 const fanFor = (album: MasonryAlbum): FanImage[] => {
 	const images = (album.items ?? []).filter((item) => item.image);
 	if (images.length === 0) return [];
 	const count = Math.min(5, images.length);
-	const cardHalfH = 84; // 卡片高 10.5rem 的一半（底边中点到中心）
-	const radius = 190; // 底边公共切线圆半径：足够大，展开后弧线明显、呈圆环片段
-	const step = 30; // 每张沿切线圆滑动 30°
+	const cardHalfH = 84; // 卡片高 10.5rem 的一半（中心到底边中点）
+	const hingeR = 30; // 底边公共切线圆（铰链）半径，圆心在底边下方
+	const step = 30; // 每张沿铰链圆滑动 30°
 	const stagger = 70; // 从最右边开始，向左每张延迟 70ms
+
+	// 最左卡片的静止姿态（其中心被钉在原地）
+	const t0 = -(count - 1) / 2;
+	const x0 = t0 * 30;
+	const y0 = 8;
+	const theta0 = -((count - 1) / 2) * step; // 张开后最左扇骨的角度
+
+	// 反解铰链圆心 P：card 中心 = P + (hingeR + cardHalfH) · (sinθ, -cosθ)
+	const arm = hingeR + cardHalfH;
+	const px = x0 - arm * Math.sin(theta0 * RAD);
+	const py = y0 + arm * Math.cos(theta0 * RAD);
 
 	const fan: FanImage[] = [];
 	for (let i = 0; i < count; i++) {
 		const index = count === 1 ? 0 : Math.round((i * (images.length - 1)) / (count - 1));
 		const t = i - (count - 1) / 2;
-		const x = t * 30;
-		const y = 8;
-		const rot = t * 14;
-
-		// 锚点：最左卡片的静止旋转角及其底边中点（切线点 T，相对容器中心）
-		// 所有卡片共用同一个切线圆（圆心由 T 与锚角确定）
-		const t0 = -(count - 1) / 2;
-		const anchor = t0 * 14 * RAD;
-		const tx = t0 * 30 + cardHalfH * Math.sin(anchor);
-		const ty = y + cardHalfH * Math.cos(anchor);
-
-		// 展开后第 i 张的切线角：从锚点起每张 +30°，沿圆滑动后的卡片中心
-		const beta = anchor + i * step * RAD;
-		const cx = tx + radius * (Math.sin(beta) - Math.sin(anchor)) - cardHalfH * Math.sin(beta);
-		const cy = ty + radius * (Math.cos(beta) - Math.cos(anchor)) - cardHalfH * Math.cos(beta);
-
+		const theta = (theta0 + i * step) * RAD;
 		fan.push({
 			image: images[index].image as string,
 			alt: images[index].title || album.name,
-			x,
-			y,
-			rot,
-			cx: Math.round(cx),
-			cy: Math.round(cy),
-			arcRot: Math.round((beta / RAD) * 10) / 10,
+			x: t * 30,
+			y: 8,
+			rot: t * 14,
+			cx: Math.round(px + arm * Math.sin(theta)),
+			cy: Math.round(py - arm * Math.cos(theta)),
+			arcRot: Math.round((theta / RAD) * 10) / 10,
 			delay: (count - 1 - i) * stagger,
 		});
 	}
