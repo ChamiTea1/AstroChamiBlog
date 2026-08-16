@@ -305,92 +305,269 @@
 	/* Home banner                                                 */
 	/* ---------------------------------------------------------- */
 
-	/* 临时预览：首页 banner 背景图每 2s 换一张，切换时旧图「破碎飞散」露出新图 */
+	/* 首页 banner 多图轮换 + 玻璃击碎特效：每 8s 换一张，
+	   旧图从随机撞击点波纹式碎成不规则多边形、3D 翻滚抛散下坠，新图垫底轻微落定缩放 */
+	const BANNER_SWAP_INTERVAL = 8000;
 	let bannerSwapTimer = null;
 	let bannerShatterLock = false;
+	let bannerThemeObserver = null;
+	let bannerStage = null; // { bg, cur, nxt, lists, idx }
 
-	function shatterBannerImage(bg, show, target, nextSrc, done) {
-		if (bannerShatterLock) return;
+	const bannerImageLists = () => {
+		const image = theme.home_banner?.image || {};
+		const toList = (value) => (Array.isArray(value) ? value.filter(Boolean) : value ? [value] : []);
+		return { light: toList(image.light), dark: toList(image.dark) };
+	};
+
+	/* 当前主题对应的图片池；本池为空时回退另一池 */
+	const activeBannerList = (lists) => {
+		const dark = document.documentElement.classList.contains('dark');
+		const list = dark ? lists.dark : lists.light;
+		return list.length ? list : dark ? lists.light : lists.dark;
+	};
+
+	const absUrl = (src) => new URL(src, window.location.href).href;
+
+	/* object-fit:cover 下图片在容器内的实际显示矩形（碎片背景按它对齐，避免拉伸错位） */
+	const coverRect = (img, w, h) => {
+		const iw = img.naturalWidth || w;
+		const ih = img.naturalHeight || h;
+		const scale = Math.max(w / iw, h / ih);
+		const dw = iw * scale;
+		const dh = ih * scale;
+		return { dw, dh, ox: (w - dw) / 2, oy: (h - dh) / 2 };
+	};
+
+	function stopBannerSwapper() {
+		if (bannerSwapTimer) {
+			window.clearInterval(bannerSwapTimer);
+			bannerSwapTimer = null;
+		}
+		if (bannerThemeObserver) {
+			bannerThemeObserver.disconnect();
+			bannerThemeObserver = null;
+		}
+		bannerStage = null;
+		bannerShatterLock = false;
+	}
+
+	/* 纯淡入淡出：prefers-reduced-motion 降级、暗色切换换池时使用 */
+	function fadeBannerTo(nextSrc) {
+		const stage = bannerStage;
+		if (!stage) return;
+		stage.currentSrc = nextSrc;
+		const { cur, nxt } = stage;
+		if (bannerShatterLock) {
+			/* 碎裂进行中：cur 已隐藏，直接瞬时切换（清理时会从 currentSrc 收尾） */
+			cur.src = nextSrc;
+			return;
+		}
+		nxt.style.transition = 'opacity 0.6s ease';
+		nxt.style.transform = 'none';
+		nxt.src = nextSrc;
+		nxt.style.opacity = '1';
+		setTimeout(() => {
+			if (bannerStage !== stage) return;
+			cur.src = nextSrc;
+			cur.style.opacity = '1';
+			nxt.style.transition = 'none';
+			nxt.style.opacity = '0';
+		}, 620);
+	}
+
+	function runBannerShatter(nextSrc) {
+		const stage = bannerStage;
+		if (!stage || bannerShatterLock) return;
 		bannerShatterLock = true;
-		// 目标图先垫底：显示下一张
-		target.src = nextSrc;
-		target.style.display = 'block';
-		target.style.opacity = '1';
-		// 用碎片层复刻当前可见图，然后让碎片飞散
+		const { bg, cur, nxt } = stage;
+
+		/* 新图垫底，1.06 → 1 落定缩放 */
+		nxt.style.transition = 'none';
+		nxt.src = nextSrc;
+		nxt.style.opacity = '1';
+		nxt.style.transform = 'scale(1.06)';
+		requestAnimationFrame(() => {
+			nxt.style.transition = 'transform 1.2s cubic-bezier(0.22, 0.61, 0.36, 1)';
+			nxt.style.transform = 'scale(1)';
+		});
+
 		const w = bg.offsetWidth;
 		const h = bg.offsetHeight;
-		const src = show.src;
-		const cols = 7;
-		const rows = 4;
+		const rect = coverRect(cur, w, h);
+		const cols = 45;
+		const rows = 28;
 		const cw = w / cols;
 		const ch = h / rows;
+		/* 风向：向左或向右吹，带 ±20° 随机倾角；上风处先起飞，波浪扫过全屏 */
+		const windAngle = (Math.random() < 0.5 ? 0 : Math.PI) + ((Math.random() * 40 - 20) * Math.PI) / 180;
+		const wx = Math.cos(windAngle);
+		const wy = Math.sin(windAngle);
+		const px = -wy; /* 垂直于风向，用于横向飘摆 */
+		const py = wx;
+		/* 抖动缺口延迟到起爆时才出现（静止时碎片层 = 完美无缝复刻原图，不提前破碎） */
+		const jag = () => Number((Math.random() * 6).toFixed(1));
+
 		const layer = document.createElement('div');
-		layer.style.cssText = 'position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;';
+		layer.style.cssText = 'position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;perspective:900px;';
+		const tiles = [];
 		for (let y = 0; y < rows; y++) {
 			for (let x = 0; x < cols; x++) {
+				const left = Math.round(x * cw);
+				const top = Math.round(y * ch);
+				const tw = Math.ceil(cw) + 2;
+				const th = Math.ceil(ch) + 2;
 				const tile = document.createElement('div');
 				tile.style.cssText = [
 					'position:absolute',
-					`left:${x * cw}px`,
-					`top:${y * ch}px`,
-					`width:${Math.ceil(cw)}px`,
-					`height:${Math.ceil(ch)}px`,
-					`background-image:url("${src}")`,
-					`background-size:${w}px ${h}px`,
-					`background-position:${-x * cw}px ${-y * ch}px`,
-					'will-change:transform,opacity',
+					`left:${left}px`,
+					`top:${top}px`,
+					`width:${tw}px`,
+					`height:${th}px`,
+					`background-image:url("${cur.src}")`,
+					`background-size:${rect.dw.toFixed(1)}px ${rect.dh.toFixed(1)}px`,
+					`background-position:${(-rect.ox - left).toFixed(1)}px ${(-rect.oy - top).toFixed(1)}px`,
+					'clip-path:inset(0% 0% 0% 0%)',
+					'will-change:transform,opacity,clip-path',
 				].join(';');
 				layer.appendChild(tile);
+				tiles.push({ tile, cx: x * cw + cw / 2, cy: y * ch + ch / 2, jag: [jag(), jag(), jag(), jag()] });
 			}
 		}
 		bg.appendChild(layer);
+		/* 碎片层已完整复刻当前图，立刻隐藏底下的原图——否则碎片飞走后露出的还是旧图，
+		   清理时才瞬间跳新图（旧图重现→突变） */
+		stage.currentSrc = nextSrc;
+		cur.style.opacity = '0';
+
 		requestAnimationFrame(() =>
 			requestAnimationFrame(() => {
-				const tiles = [...layer.children];
-				tiles.forEach((tile) => {
-					const angle = (Math.random() - 0.5) * 70;
-					const dx = (Math.random() - 0.5) * 180;
-					const dy = (Math.random() - 0.5) * 140;
-					const dur = 480 + Math.random() * 380;
-					tile.style.transition = `transform ${dur}ms cubic-bezier(0.2, 0.65, 0.4, 1), opacity ${dur}ms ease-in`;
-					tile.style.transform = `translate(${dx}px, ${dy}px) rotate(${angle}deg)`;
+				/* 起爆延迟按碎片在风向上的投影排序：上风处先被吹走，形成斜向波浪 */
+				const cornerProjs = [0, 0, w, 0, 0, h, w, h].reduce((acc, _, i, arr) => {
+					if (i % 2 === 0) acc.push(arr[i] * wx + arr[i + 1] * wy);
+					return acc;
+				}, []);
+				const minProj = Math.min(...cornerProjs);
+				const projRange = Math.max(...cornerProjs) - minProj || 1;
+				let maxEnd = 0;
+				tiles.forEach(({ tile, cx, cy, jag }) => {
+					/* 侵蚀式破碎前沿：扫描窗口（1200ms）≈ 消散时长，任意时刻只有一条窄带在破碎，
+					   后方已露出新图——前沿推到哪就碎到哪 */
+					const delay = ((cx * wx + cy * wy - minProj) / projRange) * 1200 + Math.random() * 150;
+					const dur = 500 + Math.random() * 400;
+					/* 原地溃散：碎片在前沿处脱落后就地翻飞消散，不做长距离漂移、无下坠偏置 */
+					const drift = 40 + Math.random() * 140;
+					const sway = (Math.random() - 0.5) * 90;
+					const dx = wx * drift + px * sway;
+					const dy = wy * drift + py * sway + (Math.random() - 0.5) * 40;
+					const rx = (Math.random() - 0.5) * 80;
+					const ry = (Math.random() - 0.5) * 80;
+					const rz = (Math.random() - 0.5) * 540; /* 翻滚抖动 */
+					const scale = 0.3 + Math.random() * 0.35;
+					tile.style.transition =
+						`transform ${dur.toFixed(0)}ms cubic-bezier(0.22, 0.61, 0.36, 1) ${delay.toFixed(0)}ms, ` +
+						`opacity ${(dur * 0.55).toFixed(0)}ms ease-in ${(delay + dur * 0.45).toFixed(0)}ms, ` +
+						`clip-path ${(dur * 0.35).toFixed(0)}ms ease-in ${delay.toFixed(0)}ms`;
+					tile.style.transform =
+						`translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) ` +
+						`rotateX(${rx.toFixed(1)}deg) rotateY(${ry.toFixed(1)}deg) rotateZ(${rz.toFixed(1)}deg) scale(${scale.toFixed(2)})`;
 					tile.style.opacity = '0';
+					/* 缺口与飞散同时出现：消散到哪里就破碎到哪里 */
+					tile.style.clipPath = `inset(${jag[0]}% ${jag[1]}% ${jag[2]}% ${jag[3]}%)`;
+					maxEnd = Math.max(maxEnd, delay + dur);
 				});
 				setTimeout(() => {
 					layer.remove();
-					show.src = nextSrc;
-					target.style.display = 'none';
+					if (bannerStage !== stage) return;
+					cur.src = stage.currentSrc; /* 碎裂中途若切过主题，取主题切换后的图 */
+					cur.style.opacity = '1';
+					nxt.style.transition = 'none';
+					nxt.style.transform = 'none';
+					nxt.style.opacity = '0';
 					bannerShatterLock = false;
-					done?.();
-				}, 950);
+				}, maxEnd + 80);
 			}),
 		);
+	}
+
+	/* 暗色切换：同位置换另一池的图（淡入淡出，不碎裂） */
+	function watchBannerTheme() {
+		if (bannerThemeObserver) bannerThemeObserver.disconnect();
+		bannerThemeObserver = new MutationObserver(() => {
+			const stage = bannerStage;
+			if (!stage) return;
+			const list = activeBannerList(stage.lists);
+			if (!list.length) return;
+			const src = list[stage.idx % list.length];
+			if (stage.cur.src !== absUrl(src)) fadeBannerTo(src);
+		});
+		bannerThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 	}
 
 	function initBannerSwapper() {
 		const bg = $('#home-banner-background');
 		if (!bg) {
-			if (bannerSwapTimer) {
-				window.clearInterval(bannerSwapTimer);
-				bannerSwapTimer = null;
-			}
+			stopBannerSwapper();
 			return;
 		}
-		const imgs = [...bg.querySelectorAll('img')];
-		if (imgs.length < 2 || bannerSwapTimer) return;
-		const srcs = imgs.map((img) => img.src);
-		const show = imgs[0];
-		const target = imgs[1];
-		show.style.display = 'block';
-		show.style.opacity = '1';
-		target.style.display = 'none';
-		let idx = 0;
+		if (bannerStage && bannerStage.bg === bg) return; // 当前实例已初始化
+		stopBannerSwapper();
+
+		const lists = bannerImageLists();
+		const list = activeBannerList(lists);
+		if (!list.length) return;
+
+		/* SSR 两张主题图退位，自建舞台（不碰 dark: 类） */
+		const ssrImgs = [...bg.querySelectorAll(':scope > img')];
+		const mkImg = () => {
+			const img = document.createElement('img');
+			img.alt = '';
+			img.setAttribute('aria-hidden', 'true');
+			img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+			return img;
+		};
+		const nxt = mkImg();
+		nxt.style.opacity = '0';
+		const cur = mkImg();
+		cur.src = list[0];
+		const reveal = () => ssrImgs.forEach((img) => { img.style.display = 'none'; });
+		if (cur.complete && cur.naturalWidth) reveal();
+		else {
+			cur.onload = reveal;
+			cur.onerror = reveal;
+		}
+		bg.appendChild(nxt);
+		bg.appendChild(cur);
+
+		bannerStage = { bg, cur, nxt, lists, idx: 0, currentSrc: list[0] };
+		watchBannerTheme();
+
+		/* 空闲时预载轮换池其余图片 */
+		const preloadRest = () =>
+			[...lists.light, ...lists.dark].forEach((src) => {
+				const img = new Image();
+				img.src = src;
+			});
+		if ('requestIdleCallback' in window) window.requestIdleCallback(preloadRest);
+		else setTimeout(preloadRest, 2000);
+
+		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 		bannerSwapTimer = window.setInterval(() => {
-			idx = (idx + 1) % srcs.length;
-			const nextSrc = srcs[idx];
-			if (show.src === nextSrc || bannerShatterLock) return;
-			shatterBannerImage(bg, show, target, nextSrc);
-		}, 2000);
+			if (document.hidden || bannerShatterLock || !bannerStage) return;
+			const active = activeBannerList(lists);
+			if (active.length < 2) return;
+			const nextIdx = (bannerStage.idx + 1) % active.length;
+			const nextSrc = active[nextIdx];
+			if (bannerStage.cur.src === absUrl(nextSrc)) return;
+			/* 先预载完成再碎裂，避免碎完白屏 */
+			const probe = new Image();
+			probe.onload = () => {
+				if (!bannerStage) return;
+				bannerStage.idx = nextIdx;
+				if (reduced.matches) fadeBannerTo(nextSrc);
+				else runBannerShatter(nextSrc);
+			};
+			probe.src = nextSrc;
+		}, BANNER_SWAP_INTERVAL);
 	}
 
 	function initHomeBanner() {
