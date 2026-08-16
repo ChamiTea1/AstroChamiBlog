@@ -305,8 +305,67 @@
 	/* Home banner                                                 */
 	/* ---------------------------------------------------------- */
 
-	/* 临时预览：首页 banner 背景图每 2s 换一张（直接换 src，无透明度过渡，绝不露白） */
+	/* 临时预览：首页 banner 背景图每 2s 换一张，切换时旧图「破碎飞散」露出新图 */
 	let bannerSwapTimer = null;
+	let bannerShatterLock = false;
+
+	function shatterBannerImage(bg, show, target, nextSrc, done) {
+		if (bannerShatterLock) return;
+		bannerShatterLock = true;
+		// 目标图先垫底：显示下一张
+		target.src = nextSrc;
+		target.style.display = 'block';
+		target.style.opacity = '1';
+		// 用碎片层复刻当前可见图，然后让碎片飞散
+		const w = bg.offsetWidth;
+		const h = bg.offsetHeight;
+		const src = show.src;
+		const cols = 7;
+		const rows = 4;
+		const cw = w / cols;
+		const ch = h / rows;
+		const layer = document.createElement('div');
+		layer.style.cssText = 'position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;';
+		for (let y = 0; y < rows; y++) {
+			for (let x = 0; x < cols; x++) {
+				const tile = document.createElement('div');
+				tile.style.cssText = [
+					'position:absolute',
+					`left:${x * cw}px`,
+					`top:${y * ch}px`,
+					`width:${Math.ceil(cw)}px`,
+					`height:${Math.ceil(ch)}px`,
+					`background-image:url("${src}")`,
+					`background-size:${w}px ${h}px`,
+					`background-position:${-x * cw}px ${-y * ch}px`,
+					'will-change:transform,opacity',
+				].join(';');
+				layer.appendChild(tile);
+			}
+		}
+		bg.appendChild(layer);
+		requestAnimationFrame(() =>
+			requestAnimationFrame(() => {
+				const tiles = [...layer.children];
+				tiles.forEach((tile) => {
+					const angle = (Math.random() - 0.5) * 70;
+					const dx = (Math.random() - 0.5) * 180;
+					const dy = (Math.random() - 0.5) * 140;
+					const dur = 480 + Math.random() * 380;
+					tile.style.transition = `transform ${dur}ms cubic-bezier(0.2, 0.65, 0.4, 1), opacity ${dur}ms ease-in`;
+					tile.style.transform = `translate(${dx}px, ${dy}px) rotate(${angle}deg)`;
+					tile.style.opacity = '0';
+				});
+				setTimeout(() => {
+					layer.remove();
+					show.src = nextSrc;
+					target.style.display = 'none';
+					bannerShatterLock = false;
+					done?.();
+				}, 950);
+			}),
+		);
+	}
 
 	function initBannerSwapper() {
 		const bg = $('#home-banner-background');
@@ -321,15 +380,16 @@
 		if (imgs.length < 2 || bannerSwapTimer) return;
 		const srcs = imgs.map((img) => img.src);
 		const show = imgs[0];
+		const target = imgs[1];
 		show.style.display = 'block';
 		show.style.opacity = '1';
-		imgs.slice(1).forEach((img) => {
-			img.style.display = 'none';
-		});
+		target.style.display = 'none';
 		let idx = 0;
 		bannerSwapTimer = window.setInterval(() => {
 			idx = (idx + 1) % srcs.length;
-			if (show.src !== srcs[idx]) show.src = srcs[idx];
+			const nextSrc = srcs[idx];
+			if (show.src === nextSrc || bannerShatterLock) return;
+			shatterBannerImage(bg, show, target, nextSrc);
 		}, 2000);
 	}
 
