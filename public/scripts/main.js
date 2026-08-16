@@ -2130,7 +2130,17 @@
 		window.addEventListener('scroll', onScrollBookmark, { passive: true });
 	}
 
+	/* 沉浸式音乐页：同步 html[data-type="music"]（swup 不替换 html 属性） */
+	function initPageType() {
+		if (window.location.pathname.startsWith('/music/play')) {
+			document.documentElement.dataset.type = 'music';
+		} else {
+			delete document.documentElement.dataset.type;
+		}
+	}
+
 	function initPage() {
+		initPageType();
 		initNavbarPage();
 		initSideTools();
 		initSidebarClamp();

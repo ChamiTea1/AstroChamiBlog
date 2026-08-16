@@ -19,64 +19,138 @@ const playlistsJson = JSON.stringify(
 );
 ---
 
-<BaseLayout title={title}>
-	<div id="main-content" class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5">
-		<div class="py-8 sm:py-0">
-			<div class="mb-4 flex items-center justify-between gap-3">
-				<a href="/music/" class="flex items-center text-sm text-rd-gray-900 transition-colors hover:!text-primary">
-					<i class="fa-solid fa-chevron-left mr-1 text-xs" aria-hidden="true"></i>{__('music_back')}
-				</a>
-				<div class="flex gap-2">
-					<button id="music-switch" type="button" class="music-tool" title={__('music_switch')} aria-label={__('music_switch')}>
-						<i class="fa-solid fa-repeat" aria-hidden="true"></i>
-					</button>
-					<button id="music-random" type="button" class="music-tool" title={__('music_random')} aria-label={__('music_random')}>
-						<i class="fa-solid fa-shuffle" aria-hidden="true"></i>
-					</button>
-					<button id="music-refresh" type="button" class="music-tool" title={__('music_refresh')} aria-label={__('music_refresh')}>
-						<i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
-					</button>
-				</div>
-			</div>
+<BaseLayout title={title} music>
+	<div class="music-page relative w-full">
+		<div id="music-player" class="relative z-10"></div>
 
-			<div class="music-card relative min-h-[70vh] overflow-hidden rounded-3xl border border-white/10 bg-rd-gray-1000 shadow-rd">
-				<div id="music-bg" class="absolute inset-0 scale-150 bg-cover bg-center blur-3xl opacity-40"></div>
-				<div class="absolute inset-0 bg-black/50"></div>
-				<div class="relative z-10 h-full">
-					<div id="music-player" class="h-full"></div>
-				</div>
-			</div>
-		</div>
+		<button id="music-switch" type="button" class="music-tool" title={__('music_switch')} aria-label={__('music_switch')}>
+			<i class="fa-solid fa-repeat" aria-hidden="true"></i>
+		</button>
+		<button id="music-random" type="button" class="music-tool" title={__('music_random')} aria-label={__('music_random')}>
+			<i class="fa-solid fa-shuffle" aria-hidden="true"></i>
+		</button>
+		<button id="music-refresh" type="button" class="music-tool" title={__('music_refresh')} aria-label={__('music_refresh')}>
+			<i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+		</button>
+		<a href="/music/" class="music-tool" title={__('music_back')} aria-label={__('music_back')}>
+			<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+		</a>
 	</div>
+	<div id="music-bg" aria-hidden="true"></div>
 </BaseLayout>
 
 <script is:inline set:html={`window.music_playlists = ${playlistsJson};`}></script>
 
 <style is:global>
-	/* 顶部工具按钮 */
+	/* ============================================================ */
+	/* 沉浸式音乐播放页（参考 LuviciiBlog：html[data-type="music"]）   */
+	/* ============================================================ */
+
+	html[data-type='music'],
+	html[data-type='music'] body {
+		background: rgb(13, 13, 13) !important;
+	}
+
+	/* 文字颜色整体转白（导航栏等依赖这些变量） */
+	html[data-type='music'] {
+		--rd-gray-1000: #fff;
+		--rd-gray-900: rgb(255 255 255 / 72%);
+		--rd-gray-800: rgb(255 255 255 / 60%);
+		--rd-gray-alpha-400: rgb(255 255 255 / 20%);
+	}
+
+	/* 导航栏透明化 */
+	html[data-type='music'] #navbar {
+		background: transparent !important;
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+		box-shadow: none !important;
+		border: none !important;
+	}
+
+	/* 主内容铺满、去背景去内边距 */
+	html[data-type='music'] #swup,
+	html[data-type='music'] #page-shell,
+	html[data-type='music'] #page-content,
+	html[data-type='music'] #page-content > div {
+		background: transparent !important;
+	}
+
+	html[data-type='music'] #page-content {
+		padding: 0 !important;
+	}
+
+	/* 隐藏页脚与侧边工具 */
+	html[data-type='music'] #site-footer,
+	html[data-type='music'] #side-tools {
+		display: none !important;
+	}
+
+	/* 全页模糊封面背景（随歌曲切换） */
+	#music-bg {
+		display: block;
+		position: fixed;
+		top: -50%;
+		left: -50%;
+		width: 200%;
+		height: 200%;
+		z-index: -999;
+		background-position: center center;
+		background-size: cover;
+		background-repeat: no-repeat;
+		filter: blur(63px);
+		opacity: 0.5;
+		transition: background-image 0.3s ease;
+	}
+
+	/* 右下角悬浮圆形按钮 */
 	.music-tool {
+		position: fixed;
+		right: 7vw;
+		z-index: 45;
 		display: flex;
-		height: 2.25rem;
-		width: 2.25rem;
+		width: 50px;
+		height: 50px;
 		align-items: center;
 		justify-content: center;
-		border-radius: 9999px;
-		border: 1px solid var(--rd-gray-alpha-400);
-		background: var(--rd-background-100);
-		color: var(--rd-gray-900);
-		font-size: 0.85rem;
+		border: none;
+		border-radius: 50%;
+		background: rgb(255 255 255 / 12%);
+		backdrop-filter: saturate(180%) blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		color: #fff;
+		font-size: 0.95rem;
+		cursor: pointer;
+		text-decoration: none;
 		transition:
 			background-color 0.2s ease,
-			color 0.2s ease;
+			transform 0.2s ease;
 	}
 
 	.music-tool:hover {
-		background: var(--primary-color);
-		color: var(--rd-primary-text);
+		background: rgb(255 255 255 / 24%);
+		color: #fff;
+		transform: scale(1.05);
+	}
+
+	#music-switch {
+		bottom: 100px;
+	}
+
+	#music-random {
+		bottom: 160px;
+	}
+
+	#music-refresh {
+		bottom: 220px;
+	}
+
+	.music-page > a.music-tool {
+		bottom: 280px;
 	}
 
 	/* ============================================================ */
-	/* 沉浸式播放器（参考 LuviciiBlog 的 music 页面）                  */
+	/* 播放器：左封面+歌词（40%），右歌单列表（60%），满屏高度        */
 	/* ============================================================ */
 
 	#music-player .aplayer-inline {
@@ -87,7 +161,7 @@ const playlistsJson = JSON.stringify(
 		margin: 0;
 		display: flex;
 		flex-direction: row-reverse;
-		min-height: 70vh;
+		height: calc(100vh - var(--current-navbar-height));
 		background: transparent !important;
 		border: none !important;
 		border-radius: 0 !important;
@@ -95,11 +169,10 @@ const playlistsJson = JSON.stringify(
 		color: #fff;
 	}
 
-	/* 左侧：封面 + 标题 + 歌词 + 控制条 */
 	#music-player .aplayer-body {
 		width: 40%;
-		height: auto;
-		padding: 2.5rem 1.5rem 5rem;
+		height: calc(100vh - var(--current-navbar-height) - 40px);
+		padding: 2.5rem 1.5rem 10rem;
 	}
 
 	#music-player .aplayer-pic {
@@ -158,14 +231,18 @@ const playlistsJson = JSON.stringify(
 		color: #fff;
 	}
 
-	/* 控制条 */
+	/* 控制条固定在视口底部（参考 LuviciiBlog） */
 	#music-player .aplayer-controller {
-		position: static;
-		margin-top: 1.25rem;
+		position: fixed;
+		right: 0;
+		bottom: 50px;
+		left: 0;
+		max-width: 1500px;
+		margin: 0 auto;
 	}
 
 	#music-player .aplayer-controller .aplayer-bar-wrap {
-		margin: 0;
+		margin: 0 calc(7vw + 70px) 0 150px;
 	}
 
 	#music-player .aplayer-controller .aplayer-bar {
@@ -177,40 +254,70 @@ const playlistsJson = JSON.stringify(
 	#music-player .aplayer-controller .aplayer-bar .aplayer-played {
 		height: 6px;
 		border-radius: 4px;
-		background: var(--primary-color) !important;
+		background: #fff !important;
 	}
 
 	#music-player .aplayer-controller .aplayer-bar .aplayer-played .aplayer-thumb {
-		width: 16px;
-		height: 16px;
-		margin-top: -5px;
+		width: 20px;
+		height: 20px;
+		margin-top: -7px;
 		transform: none;
 		border: none;
 		background: #fff !important;
 	}
 
 	#music-player .aplayer-controller .aplayer-time {
+		position: absolute;
+		bottom: 21px;
+		display: flex;
+		width: 100%;
+		height: 0;
+		justify-content: flex-end;
 		color: rgb(255 255 255 / 75%);
+	}
+
+	#music-player .aplayer-controller .aplayer-time .aplayer-time-inner {
+		margin-top: -8px;
+		margin-right: 18px;
 	}
 
 	#music-player .aplayer-controller .aplayer-time .aplayer-icon {
 		width: 2rem;
 		height: 2rem;
-		margin-left: 0.9rem;
+		margin-left: 15px;
 	}
 
 	#music-player .aplayer-controller .aplayer-time .aplayer-icon path {
 		fill: rgb(255 255 255 / 85%);
 	}
 
-	/* 右侧：歌单列表 */
+	#music-player .aplayer-controller .aplayer-time .aplayer-icon-back {
+		position: absolute;
+		left: 0;
+	}
+
+	#music-player .aplayer-controller .aplayer-time .aplayer-icon-play {
+		position: absolute;
+		left: 40px;
+	}
+
+	#music-player .aplayer-controller .aplayer-time .aplayer-icon-forward {
+		position: absolute;
+		left: 80px;
+	}
+
+	#music-player .aplayer-controller .aplayer-time .aplayer-icon-menu {
+		display: none;
+	}
+
+	/* 右侧歌单列表 */
 	#music-player .aplayer-list {
 		width: 60%;
-		height: auto;
+		height: 100%;
 	}
 
 	#music-player .aplayer-list ol {
-		max-height: calc(70vh - 2rem) !important;
+		max-height: calc(100vh - var(--current-navbar-height) - 2rem) !important;
 		padding-right: 1.25rem;
 	}
 
@@ -239,24 +346,59 @@ const playlistsJson = JSON.stringify(
 		color: rgb(255 255 255 / 45%);
 	}
 
-	/* 移动端：上下堆叠 */
-	@media (max-width: 1024px) {
+	/* 移动端 */
+	@media (max-width: 768px) {
+		.music-tool {
+			right: 1rem;
+			width: 44px;
+			height: 44px;
+		}
+
+		#music-switch {
+			bottom: 90px;
+		}
+
+		#music-random {
+			bottom: 144px;
+		}
+
+		#music-refresh {
+			bottom: 198px;
+		}
+
+		.music-page > a.music-tool {
+			bottom: 252px;
+		}
+
 		#music-player .aplayer {
 			flex-direction: column;
-			min-height: auto;
+			height: auto;
+			min-height: calc(100vh - var(--current-navbar-height));
 		}
 
 		#music-player .aplayer-body {
 			width: 100%;
-			padding: 2rem 1.25rem 3rem;
+			height: auto;
+			padding: 2rem 1rem 8rem;
 		}
 
 		#music-player .aplayer-list {
 			width: 100%;
+			height: auto;
 		}
 
 		#music-player .aplayer-list ol {
-			max-height: 45vh !important;
+			max-height: 38vh !important;
+			padding-bottom: 6rem;
+		}
+
+		#music-player .aplayer-controller {
+			bottom: 36px;
+			width: calc(100% - 2rem);
+		}
+
+		#music-player .aplayer-controller .aplayer-bar-wrap {
+			margin: 0;
 		}
 	}
 </style>
