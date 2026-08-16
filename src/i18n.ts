@@ -67,6 +67,8 @@ const en = {
 	music_switch: 'Switch playlist',
 	music_random: 'Shuffle play',
 	music_refresh: 'Refresh playlist',
+	music_load_error: 'Failed to load the playlist. Check your network and try again.',
+	music_retry: 'Retry',
 	image_viewer: 'Image viewer',
 	expired: 'This post is written %s days ago, and the content may not be up to date.',
 	exif: {
@@ -194,6 +196,8 @@ const zhCN: typeof en = {
 	music_switch: '切换歌单',
 	music_random: '随机播放',
 	music_refresh: '刷新歌单',
+	music_load_error: '歌单加载失败，请检查网络后重试',
+	music_retry: '重试',
 	image_viewer: '图片查看器',
 	expired: '这篇文章最后更新于 %s 天前，内容可能已经过时。',
 	exif: {
