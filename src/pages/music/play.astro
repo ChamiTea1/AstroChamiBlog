@@ -36,7 +36,9 @@ const playlistsJson = JSON.stringify(
 			<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
 		</a>
 	</div>
-	<div id="music-bg" aria-hidden="true"></div>
+	<div id="music-bg-wrap" aria-hidden="true">
+		<div id="music-bg"></div>
+	</div>
 </BaseLayout>
 
 <script is:inline set:html={`window.music_playlists = ${playlistsJson};`}></script>
@@ -86,15 +88,21 @@ const playlistsJson = JSON.stringify(
 		display: none !important;
 	}
 
-	/* 全页模糊封面背景（随歌曲切换） */
-	#music-bg {
-		display: block;
+	/* 全页模糊封面背景（随歌曲切换）；外层裁剪避免产生横向滚动 */
+	#music-bg-wrap {
 		position: fixed;
-		top: -50%;
-		left: -50%;
-		width: 200%;
-		height: 200%;
+		inset: 0;
 		z-index: -999;
+		overflow: hidden;
+		pointer-events: none;
+	}
+
+	#music-bg {
+		position: absolute;
+		top: -10%;
+		left: -10%;
+		width: 120%;
+		height: 120%;
 		background-position: center center;
 		background-size: cover;
 		background-repeat: no-repeat;
@@ -170,6 +178,7 @@ const playlistsJson = JSON.stringify(
 	}
 
 	#music-player .aplayer-body {
+		box-sizing: border-box;
 		width: 40%;
 		height: calc(100vh - var(--current-navbar-height) - 40px);
 		padding: 2.5rem 1.5rem 10rem;
@@ -312,6 +321,7 @@ const playlistsJson = JSON.stringify(
 
 	/* 右侧歌单列表 */
 	#music-player .aplayer-list {
+		box-sizing: border-box;
 		width: 60%;
 		height: 100%;
 	}
