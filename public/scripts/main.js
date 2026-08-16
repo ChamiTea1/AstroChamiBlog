@@ -421,7 +421,7 @@
 					`height:${th}px`,
 					`background-image:url("${cur.src}")`,
 					`background-size:${rect.dw.toFixed(1)}px ${rect.dh.toFixed(1)}px`,
-					`background-position:${(-rect.ox - left).toFixed(1)}px ${(-rect.oy - top).toFixed(1)}px`,
+					`background-position:${(rect.ox - left).toFixed(1)}px ${(rect.oy - top).toFixed(1)}px`,
 					'clip-path:inset(0% 0% 0% 0%)',
 					'will-change:transform,opacity,clip-path',
 				].join(';');
