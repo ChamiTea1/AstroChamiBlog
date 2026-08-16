@@ -1700,125 +1700,42 @@
 	}
 
 	/* ---------------------------------------------------------- */
-	/* Music page: playlist list + player                          */
+	/* Music play page (immersive, 参考 LuviciiBlog)               */
 	/* ---------------------------------------------------------- */
 
-	const MUSIC_STORE_KEY = 'REDEFINE-MUSIC-PLAYLISTS';
-
-	const escHtml = (value) =>
+	const escapeAttr = (value) =>
 		String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 
-	const getMusicStore = () => {
-		try {
-			const parsed = JSON.parse(localStorage.getItem(MUSIC_STORE_KEY) || '[]');
-			return Array.isArray(parsed) ? parsed : [];
-		} catch {
-			return [];
+	const musicPlayUrl = (item) =>
+		`/music/play/?server=${encodeURIComponent(item.server)}&type=${encodeURIComponent(item.type || 'playlist')}&id=${encodeURIComponent(item.id)}&name=${encodeURIComponent(item.name || '')}${
+			item.cover ? `&cover=${encodeURIComponent(item.cover)}` : ''
+		}`;
+
+	const getMusicAplayer = () => document.querySelector('#music-player meting-js')?.aplayer;
+
+	const updateMusicBg = () => {
+		const bg = $('#music-bg');
+		const pic = document.querySelector('#music-player .aplayer-pic');
+		if (bg && pic) {
+			const img = pic.style.backgroundImage;
+			if (img && img !== 'none') bg.style.backgroundImage = img;
 		}
 	};
 
-	const saveMusicStore = (list) => {
-		try {
-			localStorage.setItem(MUSIC_STORE_KEY, JSON.stringify(list));
-		} catch {
-			/* ignore */
-		}
-	};
-
-	const musicApi = () => window.meting_api || 'https://api.i-meto.com/meting/api';
-
-	const parsePlaylistInput = (raw, server) => {
-		const text = String(raw || '').trim();
-		if (!text) return null;
-		if (/^\d+$/.test(text)) return text;
-		const match =
-			server === 'tencent'
-				? text.match(/playlist\/(\d+)/i)
-				: text.match(/playlist[?/=](\d+)/i) || text.match(/playlist\/(\d+)/i);
-		return match ? match[1] : null;
-	};
-
-	const musicCardHtml = (item, removable) => {
-		const href = `/music/play/?server=${encodeURIComponent(item.server)}&type=${encodeURIComponent(item.type || 'playlist')}&id=${encodeURIComponent(item.id)}&name=${encodeURIComponent(item.name || '')}`;
-		const serverLabel = item.server === 'tencent' ? 'QQ音乐' : '网易云音乐';
-		const cover = item.cover
-			? `<img src="${escHtml(item.cover)}" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover" />`
-			: '<i class="fa-solid fa-music text-3xl" aria-hidden="true"></i>';
-		const remove = removable
-			? '<button type="button" data-music-remove class="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-rd-background-100/80 text-xs text-rd-gray-1000 backdrop-blur transition-colors hover:!text-primary" aria-label="删除"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>'
-			: '';
-		return `<li class="relative">${remove}<a href="${href}" class="group flex flex-col"><div class="music-cover flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-rd-gray-alpha-400 text-rd-gray-900">${cover}</div><div class="flex flex-col px-1 pt-2"><span class="truncate text-sm font-medium text-rd-gray-1000 group-hover:!text-primary">${escHtml(item.name || '歌单')}</span><span class="text-xs text-rd-gray-900">${escHtml(serverLabel)}</span></div></a></li>`;
-	};
-
-	let musicListWired = false;
-
-	function initMusicList() {
-		const list = $('#music-list');
-		if (!list) return;
-
-		const render = () => {
-			$$('[data-music-user-card]', list).forEach((el) => el.remove());
-			const fragment = document.createDocumentFragment();
-			getMusicStore().forEach((item) => {
-				const wrapper = document.createElement('div');
-				wrapper.innerHTML = musicCardHtml(item, true);
-				const node = wrapper.firstElementChild;
-				if (!node) return;
-				node.dataset.musicUserCard = 'true';
-				fragment.appendChild(node);
-			});
-			list.appendChild(fragment);
+	function bindMusicPlayer(element) {
+		element.dataset.bindTries = '0';
+		const tryBind = () => {
+			element.dataset.bindTries = String(Number(element.dataset.bindTries || 0) + 1);
+			const aplayer = element.aplayer;
+			if (!aplayer) {
+				if (Number(element.dataset.bindTries) < 24) setTimeout(tryBind, 250);
+				return;
+			}
+			aplayer.volume(0.8, true);
+			aplayer.on('loadeddata', updateMusicBg);
+			updateMusicBg();
 		};
-		render();
-
-		if (!musicListWired) {
-			musicListWired = true;
-			const form = $('#music-add-form');
-			form?.addEventListener('submit', async (event) => {
-				event.preventDefault();
-				const hint = $('#music-add-hint');
-				if (hint) hint.classList.add('hidden');
-				const server = $('#music-add-server')?.value || 'netease';
-				const id = parsePlaylistInput($('#music-add-id')?.value || '', server);
-				if (!id) {
-					if (hint) {
-						hint.textContent = t('music_add_invalid', 'Could not parse a playlist ID from the input.');
-						hint.classList.remove('hidden');
-					}
-					return;
-				}
-				const name = ($('#music-add-name')?.value || '').trim();
-				let cover = '';
-				try {
-					const res = await fetch(`${musicApi()}?server=${server}&type=playlist&id=${id}`);
-					const data = await res.json();
-					if (Array.isArray(data) && data.length > 0 && data[0].pic) cover = String(data[0].pic);
-				} catch {
-					/* ignore */
-				}
-				const items = getMusicStore();
-				items.push({
-					server,
-					type: 'playlist',
-					id,
-					name: name || `${server === 'tencent' ? 'QQ' : '网易云'}歌单 ${id}`,
-					cover,
-				});
-				saveMusicStore(items);
-				render();
-				form.reset();
-			});
-
-			document.addEventListener('click', (event) => {
-				const btn = event.target.closest('[data-music-remove]');
-				if (!btn) return;
-				const card = btn.closest('[data-music-user-card]');
-				const href = card?.querySelector('a')?.getAttribute('href') || '';
-				const id = new URLSearchParams(href.split('?')[1] || '').get('id');
-				saveMusicStore(getMusicStore().filter((item) => String(item.id) !== id));
-				card?.remove();
-			});
-		}
+		tryBind();
 	}
 
 	function initMusicPlay() {
@@ -1828,30 +1745,73 @@
 		const server = params.get('server') || 'netease';
 		const type = params.get('type') || 'playlist';
 		const id = params.get('id') || '';
-		const name = params.get('name') || '';
-		const nameDom = $('#music-play-name');
-		if (nameDom) nameDom.textContent = name;
+		const cover = params.get('cover') || '';
+
+		const bg = $('#music-bg');
+		if (bg && cover && !bg.dataset.seeded) {
+			bg.style.backgroundImage = `url("${escapeAttr(cover)}")`;
+			bg.dataset.seeded = 'true';
+		}
+
 		if (!id || mount.dataset.musicId === `${server}:${type}:${id}`) return;
 		mount.dataset.musicId = `${server}:${type}:${id}`;
 		mount.innerHTML = '';
 		const box = document.createElement('div');
-		box.className = 'aplayer-inline my-4';
+		box.className = 'aplayer-inline';
 		const player = document.createElement('meting-js');
 		player.setAttribute('server', server);
 		player.setAttribute('type', type);
 		player.setAttribute('id', id);
 		player.setAttribute('mutex', 'true');
-		player.setAttribute('preload', 'none');
+		player.setAttribute('preload', 'auto');
 		player.setAttribute('theme', 'var(--primary-color)');
 		player.setAttribute('order', 'list');
+		player.setAttribute('list-max-height', 'calc(70vh - 2rem)');
 		box.appendChild(player);
 		mount.appendChild(box);
 		initInlineAudio();
+		bindMusicPlayer(player);
 	}
 
-	function initMusic() {
-		initMusicList();
-		initMusicPlay();
+	function initMusicTools() {
+		const switchBtn = $('#music-switch');
+		const randomBtn = $('#music-random');
+		const refreshBtn = $('#music-refresh');
+		if (!switchBtn && !randomBtn && !refreshBtn) return;
+
+		if (!switchBtn?.dataset.wired) {
+			switchBtn?.setAttribute('data-wired', 'true');
+			switchBtn?.addEventListener('click', () => {
+				const list = Array.isArray(window.music_playlists) ? window.music_playlists : [];
+				if (list.length < 2) return;
+				const current = new URLSearchParams(window.location.search).get('id');
+				const index = list.findIndex((item) => String(item.id) === String(current));
+				const next = list[(index + 1) % list.length];
+				const url = musicPlayUrl(next);
+				if (window.swup && typeof window.swup.loadPage === 'function') window.swup.loadPage({ url });
+				else window.location.href = url;
+			});
+		}
+
+		if (!randomBtn?.dataset.wired) {
+			randomBtn?.setAttribute('data-wired', 'true');
+			randomBtn?.addEventListener('click', () => {
+				const aplayer = getMusicAplayer();
+				if (!aplayer || !aplayer.list?.audios?.length) return;
+				const index = Math.floor(Math.random() * aplayer.list.audios.length);
+				aplayer.list.switch(index);
+			});
+		}
+
+		if (!refreshBtn?.dataset.wired) {
+			refreshBtn?.setAttribute('data-wired', 'true');
+			refreshBtn?.addEventListener('click', () => {
+				const mount = $('#music-player');
+				if (!mount) return;
+				delete mount.dataset.musicId;
+				initMusicPlay();
+			});
+		}
 	}
 
 	/* ---------------------------------------------------------- */
@@ -2191,7 +2151,8 @@
 		initMermaid();
 		initAPlayer();
 		initInlineAudio();
-		initMusic();
+		initMusicPlay();
+		initMusicTools();
 		initEssays();
 		initBookmarkNav();
 		initMasonry();

@@ -1,22 +1,262 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PageTitle from '../../components/PageTitle.astro';
 import { __ } from '../../i18n';
+import musicData from '../../data/music.json';
 
 const title = __('music');
+
+interface PlaylistEntry {
+	name: string;
+	server: string;
+	type: string;
+	id: string;
+	cover?: string;
+}
+
+const playlists = (musicData as unknown as PlaylistEntry[]).filter((p) => p.id && p.name);
+const playlistsJson = JSON.stringify(
+	playlists.map((p) => ({ name: p.name, server: p.server, type: p.type || 'playlist', id: p.id, cover: p.cover || '' })),
+);
 ---
 
 <BaseLayout title={title}>
 	<div id="main-content" class="relative box-border h-full w-9/10 max-w-content transition-[max-width,width] duration-200 ease-in-out sm:w-6/7 md:w-4/5">
 		<div class="py-8 sm:py-0">
-			<PageTitle title={title} showBorder />
-			<div class="mb-4">
-				<a href="/music/" class="text-sm text-rd-gray-900 transition-colors hover:!text-primary">
+			<div class="mb-4 flex items-center justify-between gap-3">
+				<a href="/music/" class="flex items-center text-sm text-rd-gray-900 transition-colors hover:!text-primary">
 					<i class="fa-solid fa-chevron-left mr-1 text-xs" aria-hidden="true"></i>{__('music_back')}
 				</a>
+				<div class="flex gap-2">
+					<button id="music-switch" type="button" class="music-tool" title={__('music_switch')} aria-label={__('music_switch')}>
+						<i class="fa-solid fa-repeat" aria-hidden="true"></i>
+					</button>
+					<button id="music-random" type="button" class="music-tool" title={__('music_random')} aria-label={__('music_random')}>
+						<i class="fa-solid fa-shuffle" aria-hidden="true"></i>
+					</button>
+					<button id="music-refresh" type="button" class="music-tool" title={__('music_refresh')} aria-label={__('music_refresh')}>
+						<i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+					</button>
+				</div>
 			</div>
-			<div id="music-play-name" class="mb-3 text-lg font-bold text-rd-gray-1000"></div>
-			<div id="music-player" class="min-h-24"></div>
+
+			<div class="music-card relative min-h-[70vh] overflow-hidden rounded-3xl border border-white/10 bg-rd-gray-1000 shadow-rd">
+				<div id="music-bg" class="absolute inset-0 scale-150 bg-cover bg-center blur-3xl opacity-40"></div>
+				<div class="absolute inset-0 bg-black/50"></div>
+				<div class="relative z-10 h-full">
+					<div id="music-player" class="h-full"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 </BaseLayout>
+
+<script is:inline set:html={`window.music_playlists = ${playlistsJson};`}></script>
+
+<style is:global>
+	/* 顶部工具按钮 */
+	.music-tool {
+		display: flex;
+		height: 2.25rem;
+		width: 2.25rem;
+		align-items: center;
+		justify-content: center;
+		border-radius: 9999px;
+		border: 1px solid var(--rd-gray-alpha-400);
+		background: var(--rd-background-100);
+		color: var(--rd-gray-900);
+		font-size: 0.85rem;
+		transition:
+			background-color 0.2s ease,
+			color 0.2s ease;
+	}
+
+	.music-tool:hover {
+		background: var(--primary-color);
+		color: var(--rd-primary-text);
+	}
+
+	/* ============================================================ */
+	/* 沉浸式播放器（参考 LuviciiBlog 的 music 页面）                  */
+	/* ============================================================ */
+
+	#music-player .aplayer-inline {
+		margin: 0;
+	}
+
+	#music-player .aplayer {
+		margin: 0;
+		display: flex;
+		flex-direction: row-reverse;
+		min-height: 70vh;
+		background: transparent !important;
+		border: none !important;
+		border-radius: 0 !important;
+		box-shadow: none !important;
+		color: #fff;
+	}
+
+	/* 左侧：封面 + 标题 + 歌词 + 控制条 */
+	#music-player .aplayer-body {
+		width: 40%;
+		height: auto;
+		padding: 2.5rem 1.5rem 5rem;
+	}
+
+	#music-player .aplayer-pic {
+		position: relative;
+		top: auto;
+		right: auto;
+		bottom: auto;
+		left: auto;
+		float: none;
+		width: 180px;
+		height: 180px;
+		margin: 0 auto;
+		border-radius: 14px;
+		background-color: transparent !important;
+		background-size: cover;
+		box-shadow: 0 12px 32px rgb(0 0 0 / 40%);
+	}
+
+	#music-player .aplayer-info {
+		margin: 1.25rem 1.25rem 0;
+		border-bottom: none;
+	}
+
+	#music-player .aplayer-music {
+		height: auto;
+		margin: 0.75rem 0;
+		text-align: center;
+	}
+
+	#music-player .aplayer-music .aplayer-title {
+		max-width: 100%;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: #fff;
+	}
+
+	#music-player .aplayer-music .aplayer-author {
+		font-size: 1rem;
+		color: rgb(255 255 255 / 65%);
+	}
+
+	#music-player .aplayer-lrc {
+		height: auto;
+		margin-top: 1rem;
+		text-align: center;
+		mask-image: linear-gradient(to bottom, #000 70%, transparent);
+	}
+
+	#music-player .aplayer-lrc p {
+		font-size: 1rem;
+		line-height: 2.4rem;
+		color: rgb(255 255 255 / 60%);
+	}
+
+	#music-player .aplayer-lrc p.aplayer-lrc-current {
+		color: #fff;
+	}
+
+	/* 控制条 */
+	#music-player .aplayer-controller {
+		position: static;
+		margin-top: 1.25rem;
+	}
+
+	#music-player .aplayer-controller .aplayer-bar-wrap {
+		margin: 0;
+	}
+
+	#music-player .aplayer-controller .aplayer-bar {
+		height: 6px;
+		border-radius: 4px;
+		background: rgb(255 255 255 / 15%);
+	}
+
+	#music-player .aplayer-controller .aplayer-bar .aplayer-played {
+		height: 6px;
+		border-radius: 4px;
+		background: var(--primary-color) !important;
+	}
+
+	#music-player .aplayer-controller .aplayer-bar .aplayer-played .aplayer-thumb {
+		width: 16px;
+		height: 16px;
+		margin-top: -5px;
+		transform: none;
+		border: none;
+		background: #fff !important;
+	}
+
+	#music-player .aplayer-controller .aplayer-time {
+		color: rgb(255 255 255 / 75%);
+	}
+
+	#music-player .aplayer-controller .aplayer-time .aplayer-icon {
+		width: 2rem;
+		height: 2rem;
+		margin-left: 0.9rem;
+	}
+
+	#music-player .aplayer-controller .aplayer-time .aplayer-icon path {
+		fill: rgb(255 255 255 / 85%);
+	}
+
+	/* 右侧：歌单列表 */
+	#music-player .aplayer-list {
+		width: 60%;
+		height: auto;
+	}
+
+	#music-player .aplayer-list ol {
+		max-height: calc(70vh - 2rem) !important;
+		padding-right: 1.25rem;
+	}
+
+	#music-player .aplayer-list ol li {
+		border-top: 1px solid transparent;
+		font-size: 0.9rem;
+		color: rgb(255 255 255 / 75%);
+	}
+
+	#music-player .aplayer-list ol li:hover {
+		border-radius: 6px;
+		background: rgb(255 255 255 / 12%);
+	}
+
+	#music-player .aplayer-list ol li.aplayer-list-light {
+		border-radius: 6px;
+		background: rgb(255 255 255 / 15%);
+	}
+
+	#music-player .aplayer-list ol li.aplayer-list-light .aplayer-list-title {
+		font-weight: 700;
+		color: #fff;
+	}
+
+	#music-player .aplayer-list ol li .aplayer-list-author {
+		color: rgb(255 255 255 / 45%);
+	}
+
+	/* 移动端：上下堆叠 */
+	@media (max-width: 1024px) {
+		#music-player .aplayer {
+			flex-direction: column;
+			min-height: auto;
+		}
+
+		#music-player .aplayer-body {
+			width: 100%;
+			padding: 2rem 1.25rem 3rem;
+		}
+
+		#music-player .aplayer-list {
+			width: 100%;
+		}
+
+		#music-player .aplayer-list ol {
+			max-height: 45vh !important;
+		}
+	}
+</style>
