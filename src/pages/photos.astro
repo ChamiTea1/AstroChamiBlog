@@ -49,7 +49,7 @@ const fanFor = (album: MasonryAlbum): FanImage[] => {
 	if (images.length === 0) return [];
 	const count = Math.min(5, images.length);
 	const cardHalfH = 84; // 卡片高 10.5rem 的一半（底边中点到中心）
-	const radius = 150; // 底边公共切线圆半径
+	const radius = 190; // 底边公共切线圆半径：足够大，展开后弧线明显、呈圆环片段
 	const step = 30; // 每张沿切线圆滑动 30°
 	const stagger = 70; // 从最右边开始，向左每张延迟 70ms
 
@@ -62,8 +62,10 @@ const fanFor = (album: MasonryAlbum): FanImage[] => {
 		const rot = t * 14;
 
 		// 锚点：最左卡片的静止旋转角及其底边中点（切线点 T，相对容器中心）
-		const anchor = -((count - 1) / 2) * 14 * RAD;
-		const tx = x + cardHalfH * Math.sin(anchor);
+		// 所有卡片共用同一个切线圆（圆心由 T 与锚角确定）
+		const t0 = -(count - 1) / 2;
+		const anchor = t0 * 14 * RAD;
+		const tx = t0 * 30 + cardHalfH * Math.sin(anchor);
 		const ty = y + cardHalfH * Math.cos(anchor);
 
 		// 展开后第 i 张的切线角：从锚点起每张 +30°，沿圆滑动后的卡片中心
@@ -146,7 +148,7 @@ const title = __('photos');
 	   最左一张不动，其余每张 +30°，从最右边开始依次滑出 */
 	.album-fan {
 		position: relative;
-		height: 11.5rem;
+		height: 13rem;
 		margin-top: 0.5rem;
 		overflow: visible;
 	}
