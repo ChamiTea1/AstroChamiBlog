@@ -1,10 +1,10 @@
 # AstroChamiBlog
 
-An Astro port of [hexo-theme-redefine](https://github.com/EvanNotFound/hexo-theme-redefine) by EvanNotFound.
+A personal blog built with Astro 7 + Tailwind CSS v4, bilingual (Chinese / English).
 
 ## Features
 
-- Redefine design system: gradient navbar, card-style articles, Geist/Chillax fonts, Font Awesome icons
+- Modern design system: gradient navbar, card-style articles, Geist/Chillax fonts, Font Awesome icons
 - Full-screen home banner with fixed background, typed subtitle (Typed.js + 一言 API), social links & QR codes
 - Home sidebar (avatar, author Lv, statistics, announcement, links) + post cards with cover/excerpt/tags
 - Article page: cover with blurred title overlay, author + Lv label, meta line (dates, categories, tags, word count, reading time), sticky TOC with scroll spy, copyright box, prev/next navigation, article recommendation (TF-IDF)
@@ -14,7 +14,7 @@ An Astro port of [hexo-theme-redefine](https://github.com/EvanNotFound/hexo-them
 - **站内搜索** (build-time index, Redefine-style dialog, keyword highlight)
 - **图片查看器** (click to zoom, drag, wheel zoom, prev/next, EXIF panel)
 - **评论系统** (waline / giscus / gitalk / twikoo / utterances / artalk, config-driven)
-- **Hexo tag 插件**: `{% button %}` `{% callout %}` `{% note %}` `{% folding %}` `{% grid %}` `{% tabs %}`
+- **标签插件**: `{% button %}` `{% callout %}` `{% note %}` `{% folding %}` `{% grid %}` `{% tabs %}`
 - **Mermaid** diagrams (```mermaid fences), **APlayer** music player, **Preloader** animation, **Pangu** CJK spacing
 - Shiki code highlighting (light/dark themes, mac-style container with copy/fold buttons), lazyload, del-mask, external link icons, table scroll
 - Pages: home (paginated), post, `/archives`, `/tags`, `/tags/<tag>/`, `/categories` (nested), `/categories/<cat>/`, `/friends`, `/bookmarks`, `/essays`, `/photos` (masonry), `/about`, 404
@@ -30,7 +30,7 @@ An Astro port of [hexo-theme-redefine](https://github.com/EvanNotFound/hexo-them
 │   ├── images/           # favicon, avatar, logo, banner images
 │   └── scripts/          # main.js + Typed.min.js
 ├── src/
-│   ├── config.ts         # Theme configuration (port of _config.yml)
+│   ├── config.ts         # Theme configuration
 │   ├── i18n.ts           # Translations (en / zh-CN)
 │   ├── components/       # Navbar, Footer, PostCard, TOC, ...
 │   ├── layouts/BaseLayout.astro
@@ -44,7 +44,7 @@ An Astro port of [hexo-theme-redefine](https://github.com/EvanNotFound/hexo-them
 
 ## Configuration
 
-All theme options live in **`src/config.ts`** (mirrors the Redefine `_config.yml`):
+All theme options live in **`src/config.ts`**:
 
 - `siteConfig` — title, subtitle, author, url, language (`en` / `zh-CN`)
 - `themeConfig.colors` — primary color, default mode
@@ -85,14 +85,14 @@ og_image: './og.jpg'
 ---
 ```
 
-## Hexo tag plugins
+## Tag Plugins
 
 ```markdown
 {% button 按钮文字, https://example.com %}
 {% button url="https://example.com" text="Named" icon="fa-brands fa-github" align="center" %}
 {% callout info %}提示内容{% endcallout %}
 {% callout warning :: 带标题的提示 %}内容{% endcallout %}
-{% note info %}兼容旧语法{% endnote %}
+{% note info %}提示内容{% endnote %}
 {% folding 折叠标题 %}折叠内容{% endfolding %}
 {% folding title="默认展开" open=true %}内容{% endfolding %}
 {% grid 2 %}...{% endgrid %}
@@ -117,9 +117,9 @@ og_image: './og.jpg'
 - Post URLs are `/blog/<slug>/`; home page pagination is `/page/<n>/`.
 - Local search (`navbar.search.enable`) requires no extra setup — the index is generated at build time (`/search.json`).
 - swup (single page) is enabled by default (`global.single_page`); scripts marked `data-swup-reload-script` re-run on page swaps.
-- Font Awesome assets (including some Pro icons) are bundled from the original theme.
-- Not ported: nodejieba-based Chinese word segmentation for recommendations (a pure-JS TF-IDF tokenizer is used instead), hexo-generator-searchdb XML format (JSON used instead).
+- Font Awesome assets (including some Pro icons) are bundled locally.
+- Article recommendations use a pure-JS TF-IDF tokenizer (no native dependencies); the search index uses JSON format.
 
 ## Credit
 
-Theme design by [EvanNotFound](https://github.com/EvanNotFound/hexo-theme-redefine). Please keep the theme credit in the footer.
+Design language inspired by [EvanNotFound](https://github.com/EvanNotFound). The footer keeps the original theme credit.
