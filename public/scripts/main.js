@@ -339,6 +339,67 @@
 		return { dw, dh, ox: (w - dw) / 2, oy: (h - dh) / 2 };
 	};
 
+	/* 按图亮度自适应文字颜色：暗图 → 亮字，亮图 → 深字。
+	   顶部导航看上缘亮度（导航条压在图上缘），大标题/副标题看中部亮度（两行文字居中） */
+	const bannerLumaCache = new Map();
+
+	const bannerLuma = (src, img) =>
+		new Promise((resolve) => {
+			const finish = () => {
+				try {
+					const cv = document.createElement('canvas');
+					cv.width = 64;
+					cv.height = 36;
+					const ctx = cv.getContext('2d', { willReadFrequently: true });
+					ctx.drawImage(el, 0, 0, 64, 36);
+					const d = ctx.getImageData(0, 0, 64, 36).data;
+					let full = 0;
+					let top = 0;
+					let mid = 0;
+					for (let y = 0; y < 36; y++) {
+						for (let x = 0; x < 64; x++) {
+							const i = (y * 64 + x) * 4;
+							const l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+							full += l;
+							if (y < 9) top += l;
+							if (y >= 14 && y < 22) mid += l;
+						}
+					}
+					resolve({ full: full / 2304, top: top / 576, mid: mid / 512 });
+				} catch (err) {
+					resolve(null);
+				}
+			};
+			const el = img || new Image();
+			if (!img) el.src = src;
+			if (el.complete && el.naturalWidth) finish();
+			else {
+				/* 用 addEventListener，避免覆盖该 img 已有的 onload（如 cur 的 reveal） */
+				el.addEventListener('load', finish, { once: true });
+				el.addEventListener('error', () => resolve(null), { once: true });
+			}
+		});
+
+	const applyBannerTextColors = (src, img) => {
+		const abs = absUrl(src);
+		let p = bannerLumaCache.get(abs);
+		if (!p) {
+			p = bannerLuma(src, img);
+			bannerLumaCache.set(abs, p);
+		}
+		p.then((luma) => {
+			if (!luma || !bannerStage) return;
+			if (absUrl(bannerStage.currentSrc) !== abs) return; /* 图已切换，丢弃过期结果 */
+			const dark = document.documentElement.classList.contains('dark');
+			const lightText = dark ? '#d1d1b6' : '#ffffff';
+			const darkText = 'var(--rd-gray-1000)';
+			const style = document.documentElement.style;
+			/* 中部阈值取 110：中等偏亮背景（如 123/126）也切深色字，保证两行文字可读 */
+			style.setProperty('--home-banner-text-color', luma.mid < 110 ? lightText : darkText);
+			style.setProperty('--home-navbar-text-color', luma.top < 128 ? lightText : darkText);
+		});
+	};
+
 	function stopBannerSwapper() {
 		if (bannerSwapTimer) {
 			window.clearInterval(bannerSwapTimer);
@@ -357,6 +418,7 @@
 		const stage = bannerStage;
 		if (!stage) return;
 		stage.currentSrc = nextSrc;
+		applyBannerTextColors(nextSrc);
 		const { cur, nxt } = stage;
 		if (bannerShatterLock) {
 			/* 碎裂进行中：cur 已隐藏，直接瞬时切换（清理时会从 currentSrc 收尾） */
@@ -754,7 +816,7 @@ void main() { fragColor = texture(uTex, vUV) * vAlpha; }`;
 		/* WebGL 路径碎片数量：GPU 一次 draw call 结算，25600 片（约 7px/片）也轻松；
 		   再小就成噪点粉尘了。小屏 100×64。DOM 回退在下方单独降档。 */
 		const small = w < 768;
-		const cols = small ? 100 : 33;
+		const cols = small ? 10 : 33;
 		const rows = small ? 64 : 33;
 		const cw = w / cols;
 		const ch = h / rows;
@@ -777,6 +839,7 @@ void main() { fragColor = texture(uTex, vUV) * vAlpha; }`;
 		/* 碎片层已完整复刻当前图，立刻隐藏底下的原图——否则碎片飞走后露出的还是旧图，
 		   清理时才瞬间跳新图（旧图重现→突变） */
 		stage.currentSrc = nextSrc;
+		applyBannerTextColors(nextSrc);
 
 		/* WebGL 优先：1 个 canvas、1 次 draw call，GPU 结算全部动画，主线程零开销 */
 		if (initBannerShatterGL(stage, rect, w, h, shards, px, py)) {
@@ -895,12 +958,15 @@ void main() { fragColor = texture(uTex, vUV) * vAlpha; }`;
 
 		bannerStage = { bg, cur, nxt, lists, idx: 0, currentSrc: list[0] };
 		watchBannerTheme();
+		/* 首图文字配色（cur 已加载，直接用其解码结果采样亮度） */
+		applyBannerTextColors(list[0], cur);
 
-		/* 空闲时预载轮换池其余图片 */
+		/* 空闲时预载轮换池其余图片，并顺带算好各自的亮度供换图时配色 */
 		const preloadRest = () =>
 			[...lists.light, ...lists.dark].forEach((src) => {
 				const img = new Image();
 				img.src = src;
+				bannerLuma(src, img);
 			});
 		if ('requestIdleCallback' in window) window.requestIdleCallback(preloadRest);
 		else setTimeout(preloadRest, 2000);
