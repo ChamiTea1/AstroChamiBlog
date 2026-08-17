@@ -413,9 +413,13 @@
 		bannerShatterLock = false;
 	}
 
-	/* 大标题只在第一个封面展示：首次换图时淡出并保持隐藏 */
-	const hideBannerSlogan = () => {
-		document.querySelector('#home-banner .home-banner-slogan')?.classList.add('is-hidden');
+	/* 大标题只在每轮的第一张封面展示：当前图是第一张时淡入，其余封面隐藏 */
+	const updateBannerSlogan = () => {
+		const slogan = document.querySelector('#home-banner .home-banner-slogan');
+		if (!slogan || !bannerStage) return;
+		const list = activeBannerList(bannerStage.lists);
+		const show = list.length > 0 && absUrl(bannerStage.currentSrc) === absUrl(list[0]);
+		slogan.classList.toggle('is-hidden', !show);
 	};
 
 	/* 纯淡入淡出：prefers-reduced-motion 降级、暗色切换换池时使用 */
@@ -424,7 +428,7 @@
 		if (!stage) return;
 		stage.currentSrc = nextSrc;
 		applyBannerTextColors(nextSrc);
-		hideBannerSlogan();
+		updateBannerSlogan();
 		const { cur, nxt } = stage;
 		if (bannerShatterLock) {
 			/* 碎裂进行中：cur 已隐藏，直接瞬时切换（清理时会从 currentSrc 收尾） */
@@ -846,7 +850,7 @@ void main() { fragColor = texture(uTex, vUV) * vAlpha; }`;
 		   清理时才瞬间跳新图（旧图重现→突变） */
 		stage.currentSrc = nextSrc;
 		applyBannerTextColors(nextSrc);
-		hideBannerSlogan();
+		updateBannerSlogan();
 
 		/* WebGL 优先：1 个 canvas、1 次 draw call，GPU 结算全部动画，主线程零开销 */
 		if (initBannerShatterGL(stage, rect, w, h, shards, px, py)) {

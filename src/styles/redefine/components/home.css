@@ -9,7 +9,7 @@
     transition: color 0.6s ease;
   }
 
-  /* 大标题只在第一个封面展示：首次换图后淡出并保持隐藏 */
+  /* 大标题只在每轮的第一张封面展示：换图时按当前图是否为第一张淡入/淡出 */
   .home-banner-slogan {
     transition: opacity 0.8s ease, color 0.6s ease;
   }
